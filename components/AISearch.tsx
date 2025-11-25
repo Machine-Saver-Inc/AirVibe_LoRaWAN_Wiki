@@ -1,12 +1,13 @@
+
 import React, { useState } from 'react';
 import { Search, Sparkles, Loader2, ArrowRight } from 'lucide-react';
 import { searchWiki } from '../services/geminiService';
-import { WikiPage } from '../types';
+import { SectionType, WikiPage } from '../types';
 import MarkdownRenderer from './MarkdownRenderer';
 
 interface AISearchProps {
   activeData: WikiPage[];
-  onNavigate: (id: string) => void;
+  onNavigate: (section: SectionType, id: string) => void;
 }
 
 const AISearch: React.FC<AISearchProps> = ({ activeData, onNavigate }) => {
@@ -22,13 +23,21 @@ const AISearch: React.FC<AISearchProps> = ({ activeData, onNavigate }) => {
     setLoading(true);
     setAnswer(null);
     setLinkId(null);
-
+    
     // Pass the currently active data version to the search
     const result = await searchWiki(query, activeData);
-
+    
     setAnswer(result.answer);
     setLinkId(result.relevantSectionId || null);
     setLoading(false);
+  };
+
+  const handleLinkClick = (id: string) => {
+    // Find which page/section this ID belongs to
+    const page = activeData.find(p => p.id === id);
+    if (page) {
+      onNavigate(page.section, id);
+    }
   };
 
   return (
@@ -58,22 +67,22 @@ const AISearch: React.FC<AISearchProps> = ({ activeData, onNavigate }) => {
 
       {answer && (
         <div className="mt-4 p-6 bg-white border border-blue-100 rounded-lg shadow-sm ring-1 ring-blue-50 relative animate-fade-in">
-          <h4 className="text-sm font-bold text-blue-600 uppercase tracking-wide mb-2 flex items-center gap-2">
+           <h4 className="text-sm font-bold text-blue-600 uppercase tracking-wide mb-2 flex items-center gap-2">
             <Sparkles className="w-4 h-4" /> AI Answer
-          </h4>
-          <div className="prose prose-slate text-slate-700 leading-relaxed whitespace-pre-line">
-            <MarkdownRenderer text={answer} />
-          </div>
-          {linkId && (
-            <div className="mt-4 pt-4 border-t border-slate-100 flex justify-end">
-              <button
-                onClick={() => onNavigate(linkId)}
-                className="flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
-              >
-                Go to relevant section <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-          )}
+           </h4>
+           <div className="prose prose-slate text-slate-700 leading-relaxed whitespace-pre-line">
+             <MarkdownRenderer text={answer} />
+           </div>
+           {linkId && (
+             <div className="mt-4 pt-4 border-t border-slate-100 flex justify-end">
+               <button 
+                 onClick={() => handleLinkClick(linkId)}
+                 className="flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
+               >
+                 Go to relevant section <ArrowRight className="w-4 h-4" />
+               </button>
+             </div>
+           )}
         </div>
       )}
     </div>
