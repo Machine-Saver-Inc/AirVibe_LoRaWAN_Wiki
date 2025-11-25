@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Menu, X, Book, Database, Activity, Settings, Cpu, Radio, History, Clock, Code } from 'lucide-react';
 import { versionHistory } from './data/wikiContent';
 import PacketTable from './components/PacketTable';
@@ -13,6 +13,7 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<SectionType>(SectionType.OVERVIEW);
   const [currentVersionIndex, setCurrentVersionIndex] = useState(0);
+  const [pendingScrollId, setPendingScrollId] = useState<string | null>(null);
 
   const currentVersion = versionHistory[currentVersionIndex];
   const activeData = currentVersion.data;
@@ -50,16 +51,41 @@ function App() {
     }
   };
 
+  // Scroll to pending section when it becomes available
+  useEffect(() => {
+    if (pendingScrollId) {
+      const element = document.getElementById(pendingScrollId);
+      if (element) {
+        // Small timeout to ensure layout is stable
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          element.classList.add('bg-blue-50', 'transition-colors', 'duration-500');
+          setTimeout(() => element.classList.remove('bg-blue-50'), 2000);
+          setPendingScrollId(null);
+        }, 100);
+      }
+    }
+  }, [pendingScrollId, activeSection]);
+
+  const handleNavigate = (id: string) => {
+    // Find which section contains this ID
+    const targetPage = activeData.find(p => p.id === id);
+    if (targetPage) {
+      setActiveSection(targetPage.section);
+      setPendingScrollId(id);
+    }
+  };
+
   const AlertIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
   );
 
   return (
     <div className="h-screen bg-slate-50 flex font-sans text-slate-900 overflow-hidden">
-      
+
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-20 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
@@ -70,7 +96,7 @@ function App() {
         <div className="p-6 border-b border-slate-800 flex items-center justify-between">
           <div>
             <div className="flex items-center gap-3">
-               <h1 className="text-xl font-bold text-white tracking-tight">AirVibe Wiki</h1>
+              <h1 className="text-xl font-bold text-white tracking-tight">AirVibe Wiki</h1>
             </div>
             <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-1 font-semibold">LoRaWAN Condition Monitoring Sensor</p>
           </div>
@@ -81,28 +107,28 @@ function App() {
 
         {/* Version Selector */}
         <div className="px-4 py-4 border-b border-slate-800 bg-slate-900/50">
-           <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 block flex items-center gap-2">
-             <History className="w-3 h-3" /> Version History
-           </label>
-           <div className="relative">
-             <select 
-               value={currentVersionIndex}
-               onChange={(e) => setCurrentVersionIndex(Number(e.target.value))}
-               className="w-full bg-slate-800 text-slate-200 text-sm rounded border border-slate-700 p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none"
-             >
-               {versionHistory.map((ver, idx) => (
-                 <option key={ver.version} value={idx}>
-                   v{ver.version} ({ver.date})
-                 </option>
-               ))}
-             </select>
-             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
-               <Clock className="w-3 h-3" />
-             </div>
-           </div>
-           <p className="text-[10px] text-slate-500 mt-2 leading-tight">
-             {currentVersion.description}
-           </p>
+          <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 block flex items-center gap-2">
+            <History className="w-3 h-3" /> Version History
+          </label>
+          <div className="relative">
+            <select
+              value={currentVersionIndex}
+              onChange={(e) => setCurrentVersionIndex(Number(e.target.value))}
+              className="w-full bg-slate-800 text-slate-200 text-sm rounded border border-slate-700 p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none"
+            >
+              {versionHistory.map((ver, idx) => (
+                <option key={ver.version} value={idx}>
+                  v{ver.version} ({ver.date})
+                </option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
+              <Clock className="w-3 h-3" />
+            </div>
+          </div>
+          <p className="text-[10px] text-slate-500 mt-2 leading-tight">
+            {currentVersion.description}
+          </p>
         </div>
 
         <nav className="flex-1 overflow-y-auto py-6 px-3 space-y-1">
@@ -110,18 +136,17 @@ function App() {
             <button
               key={section}
               onClick={() => { setActiveSection(section); setSidebarOpen(false); }}
-              className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
-                activeSection === section 
-                  ? 'bg-blue-600 text-white shadow-lg' 
+              className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors ${activeSection === section
+                  ? 'bg-blue-600 text-white shadow-lg'
                   : 'hover:bg-slate-800 hover:text-white'
-              }`}
+                }`}
             >
               {getIconForSection(section)}
               {section}
             </button>
           ))}
         </nav>
-        
+
         <div className="p-4 border-t border-slate-800">
           <div className="text-xs text-slate-500 text-center">
             &copy; 2025 Machine Saver, Inc.
@@ -138,20 +163,20 @@ function App() {
               <Menu className="w-6 h-6" />
             </button>
             <div>
-               <h2 className="text-xl font-semibold text-slate-800">{activeSection}</h2>
-               {currentVersionIndex !== 0 && (
-                 <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 mt-1">
-                   Viewing Older Version ({currentVersion.version})
-                 </span>
-               )}
+              <h2 className="text-xl font-semibold text-slate-800">{activeSection}</h2>
+              {currentVersionIndex !== 0 && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 mt-1">
+                  Viewing Older Version ({currentVersion.version})
+                </span>
+              )}
             </div>
           </div>
         </header>
 
         {/* Scrollable Content Area */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-8 lg:p-12 scroll-smooth">
-          
-          {activeSection !== SectionType.DECODER && <AISearch activeData={activeData} />}
+
+          {activeSection !== SectionType.DECODER && <AISearch activeData={activeData} onNavigate={handleNavigate} />}
 
           {activeSection === SectionType.DECODER ? (
             <UplinkDecoder />
@@ -178,8 +203,8 @@ function App() {
                   )}
 
                   {page.packetTable && (
-                    <PacketTable 
-                      packetType={page.packetTable.packetType} 
+                    <PacketTable
+                      packetType={page.packetTable.packetType}
                       port={page.packetTable.port}
                       fields={page.packetTable.fields}
                     />
@@ -188,7 +213,7 @@ function App() {
                   {page.extraTable && (
                     <div className="overflow-hidden rounded-lg border border-slate-200 shadow-sm mt-4">
                       <div className="bg-slate-100 px-4 py-3 border-b border-slate-200">
-                          <h4 className="font-semibold text-slate-700">{page.extraTable.title}</h4>
+                        <h4 className="font-semibold text-slate-700">{page.extraTable.title}</h4>
                       </div>
                       <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-slate-200">

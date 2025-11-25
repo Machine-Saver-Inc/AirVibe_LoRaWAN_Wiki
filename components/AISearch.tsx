@@ -6,9 +6,10 @@ import MarkdownRenderer from './MarkdownRenderer';
 
 interface AISearchProps {
   activeData: WikiPage[];
+  onNavigate: (id: string) => void;
 }
 
-const AISearch: React.FC<AISearchProps> = ({ activeData }) => {
+const AISearch: React.FC<AISearchProps> = ({ activeData, onNavigate }) => {
   const [query, setQuery] = useState('');
   const [answer, setAnswer] = useState<string | null>(null);
   const [linkId, setLinkId] = useState<string | null>(null);
@@ -21,23 +22,13 @@ const AISearch: React.FC<AISearchProps> = ({ activeData }) => {
     setLoading(true);
     setAnswer(null);
     setLinkId(null);
-    
+
     // Pass the currently active data version to the search
     const result = await searchWiki(query, activeData);
-    
+
     setAnswer(result.answer);
     setLinkId(result.relevantSectionId || null);
     setLoading(false);
-  };
-
-  const scrollToSection = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      // Add a highlight effect
-      element.classList.add('bg-blue-50', 'transition-colors', 'duration-500');
-      setTimeout(() => element.classList.remove('bg-blue-50'), 2000);
-    }
   };
 
   return (
@@ -67,22 +58,22 @@ const AISearch: React.FC<AISearchProps> = ({ activeData }) => {
 
       {answer && (
         <div className="mt-4 p-6 bg-white border border-blue-100 rounded-lg shadow-sm ring-1 ring-blue-50 relative animate-fade-in">
-           <h4 className="text-sm font-bold text-blue-600 uppercase tracking-wide mb-2 flex items-center gap-2">
+          <h4 className="text-sm font-bold text-blue-600 uppercase tracking-wide mb-2 flex items-center gap-2">
             <Sparkles className="w-4 h-4" /> AI Answer
-           </h4>
-           <div className="prose prose-slate text-slate-700 leading-relaxed whitespace-pre-line">
-             <MarkdownRenderer text={answer} />
-           </div>
-           {linkId && (
-             <div className="mt-4 pt-4 border-t border-slate-100 flex justify-end">
-               <button 
-                 onClick={() => scrollToSection(linkId)}
-                 className="flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
-               >
-                 Go to relevant section <ArrowRight className="w-4 h-4" />
-               </button>
-             </div>
-           )}
+          </h4>
+          <div className="prose prose-slate text-slate-700 leading-relaxed whitespace-pre-line">
+            <MarkdownRenderer text={answer} />
+          </div>
+          {linkId && (
+            <div className="mt-4 pt-4 border-t border-slate-100 flex justify-end">
+              <button
+                onClick={() => onNavigate(linkId)}
+                className="flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
+              >
+                Go to relevant section <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
