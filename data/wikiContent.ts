@@ -16,34 +16,30 @@ const v1_01_Data: WikiPage[] = [
     id: 'uplink-config',
     title: 'Current Configuration Uplink',
     section: SectionType.UPLINKS,
-    content: `Sent by AirVibe TPM to the Gateway to report its current settings.
-    
-    **Packet Type:** 4
-    
-    **Firmware Revision Encoding:** High byte = Major Number, Low byte = Minor Number.`,
+    content: `Sent by AirVibe TPM to the Gateway to report its current settings.`,
     packetTable: {
       packetType: 4,
       fields: [
         { byte: '0', name: 'Packet Type', description: 'Always 4' },
         { byte: '1', name: 'Version', description: 'Protocol Version' },
-        { byte: '2', name: 'Push Mode', description: '0x01: Overall, 0x02: Time Waveform, 0x03: Both' },
-        { byte: '3', name: 'Axis', description: 'Bitmask of active axes' },
-        { byte: '4', name: 'Acceleration Range', description: 'Range in g (e.g., 2, 4, 8, 16)' },
-        { byte: '5', name: 'Hardware Filter', description: 'Filter setting ID' },
+        { byte: '2', name: 'Push Mode', description: '0x01: Overall, 0x02: Time Waveform, 0x03: Dual Mode (Overalls Interspersed with Time Waveform Packets)' },
+        { byte: '3', name: 'Time Waveform Axis', description: 'Bitmask of active axes. axis_1_only = 0x01, axis_2_only = 0x02, axis_3_only = 0x04, all_axes = 0x07' },
+        { byte: '4', name: 'Acceleration Range', description: '2g, 4g, 8g, 16g (special order - 32g, 64g)' },
+        { byte: '5', name: 'Hardware Filter', description: '0 – no filter, 23 - High Pass - 33 Hz, 22 - High Pass - 67 Hz, 21 - High Pass - 134 Hz, 20 - High Pass - 267 Hz, 19 - High Pass - 593 Hz, 18 - Hig3h Pass - 1335 Hz, 17 - High Pass - 2670 Hz, 135 - Low Pass - 33 Hz, 134 - Low Pass - 67 Hz, 133 - Low Pass - 134 Hz, 132 - Low Pass - 267 Hz, 131 - Low Pass - 593 Hz, 130 - Low Pass - 1335 Hz, 129 - Low Pass - 2670 Hz, 128 - Low Pass - 6675 Hz' },
         { byte: '6-7', name: 'Time Waveform Push Period', description: 'Minutes between waveform pushes' },
         { byte: '8-9', name: 'Overall Push Period', description: 'Minutes between overall data pushes' },
-        { byte: '10-11', name: 'Number of samples', description: 'Sample count for waveforms' },
+        { byte: '10-11', name: 'Waveform Samples Per Axis', description: 'Number of Samples waveforms per configured axis' },
         { byte: '12-13', name: 'High Pass Filter', description: 'Frequency in Hz' },
         { byte: '14-15', name: 'Low Pass Filter', description: 'Frequency in Hz' },
         { byte: '16', name: 'Window Function', description: 'Windowing function ID' },
         { byte: '17-18', name: 'Alarm Test Period', description: 'Minutes between alarm checks' },
-        { byte: '19-20', name: 'Alarms bitmask', description: 'Active alarms configuration' },
+        { byte: '19-20', name: 'Alarms bitmask', description: 'Active alarms configuration. temperature = 0x01, acceleration_axis1 = 0x02, acceleration_axis2 = 0x04, acceleration_axis3 = 0x08, velocity_axis1 = 0x10, velocity_axis2 = 0x20, velocity_axis3 = 0x40' },
         { byte: '21-22', name: 'Temperature Alarm Level', description: 'Threshold for temp alarm' },
-        { byte: '23-28', name: 'Acceleration Levels', description: '2 bytes per axis (1, 2, 3)' },
-        { byte: '29-34', name: 'Velocity Levels', description: '2 bytes per axis (1, 2, 3)' },
-        { byte: '35-36', name: 'TPM Firmware Rev', description: 'AirVibe TPM Firmware Version' },
-        { byte: '37-38', name: 'VSM Firmware Rev', description: 'AirVibe VSM Firmware Version' },
-        { byte: '39-40', name: 'Machine Off Threshold', description: 'Threshold in mg' },
+        { byte: '23-28', name: 'Acceleration Alarm Levels', description: '2 bytes per axis (1, 2, 3)' },
+        { byte: '29-34', name: 'Velocity Alarm Levels', description: '2 bytes per axis (1, 2, 3)' },
+        { byte: '35-36', name: 'TPM Firmware Rev', description: 'AirVibe TPM Firmware Version. Firmware Revision Encoding: High byte = Major Number, Low byte = Minor Number.' },
+        { byte: '37-38', name: 'VSM Firmware Rev', description: 'AirVibe VSM Firmware Version. Firmware Revision Encoding: High byte = Major Number, Low byte = Minor Number.' },
+        { byte: '39-40', name: 'Machine Off Threshold', description: 'Threshold in milli-g' },
       ]
     }
   },
@@ -51,15 +47,13 @@ const v1_01_Data: WikiPage[] = [
     id: 'uplink-overall',
     title: 'Overall Uplink',
     section: SectionType.UPLINKS,
-    content: `Transfers summary vibration readings, status, and battery information.
-    
-    **Packet Type:** 2`,
+    content: `Transfers summary vibration readings, status, and battery information.`,
     packetTable: {
       packetType: 2,
       fields: [
         { byte: '0', name: 'Packet Type', description: 'Always 2' },
-        { byte: '1', name: 'Status', description: '0 = OK, others = Error Code' },
-        { byte: '2', name: 'Alarm Flag', description: '0 = No Alarms, 1 = Alarm Detected' },
+        { byte: '1', name: 'Status', description: '0 = OK, 1= "UART Read Error", 2= "UART Read Busy", 3= "UART Read Timeout", 4= "UART Write Error", 5= "UART Write Busy", 6= "UART Write Timeout", 7= "Modbus CRC Error", 8= "Vibration Sensor Module (VSM) error", 11= "Timewave API Not Initialized", 12= "Timewave collection timeout", 13= "Timewave Bad Params", 14= "Timewave Read Error", 15= "Timewave processing timeout", 16= "Machine Off", 21= "Missing ack"' },
+        { byte: '2', name: 'Active Alarm Bitmask', description: 'no_alarm = 0x00, temperature = 0x01, acceleration_axis1 = 0x02, acceleration_axis2 = 0x04, acceleration_axis3 = 0x08, velocity_axis1 = 0x10, velocity_axis2 = 0x20, velocity_axis3 = 0x40' },
         { byte: '3', name: 'Temperature', description: 'Degrees C (Value / 10)' },
         { byte: '4', name: 'Voltage', description: 'Volts (Value / 10)' },
         { byte: '5', name: 'Charge Status', description: 'Percentage' },
@@ -77,15 +71,7 @@ const v1_01_Data: WikiPage[] = [
     id: 'uplink-twf-info',
     title: 'Time Waveform Info Uplink',
     section: SectionType.UPLINKS,
-    content: `Initiates a Time Waveform transfer sequence. Contains metadata about the waveform about to be sent.
-    
-    **Packet Type:** 3
-    
-    **Axis Selection Codes:**
-    *   1: Axis 1 only
-    *   2: Axis 2 only
-    *   4: Axis 3 only
-    *   7: All 3 Axes simultaneously`,
+    content: `Initiates a Time Waveform transfer sequence. Contains metadata about the waveform about to be sent.`,
     packetTable: {
       packetType: 3,
       fields: [
@@ -93,7 +79,7 @@ const v1_01_Data: WikiPage[] = [
         { byte: '1', name: 'Transaction ID', description: 'Unique ID for the waveform' },
         { byte: '2', name: 'Segment Number', description: 'Number of the sent segment' },
         { byte: '3', name: 'Error Code', description: '0 = OK' },
-        { byte: '4', name: 'Axis Selection', description: 'See Axis Codes' },
+        { byte: '4', name: 'Axis Selection', description: 'Bitmask of active axes. axis_1_only = 0x01, axis_2_only = 0x02, axis_3_only = 0x04, all_axes = 0x07' },
         { byte: '5-6', name: 'Number of Segments', description: 'Total segments in waveform' },
         { byte: '7', name: 'Hardware Filter', description: 'Filter setting used' },
         { byte: '8-9', name: 'Sampling Rate', description: 'Rate of acquisition' },
@@ -105,11 +91,7 @@ const v1_01_Data: WikiPage[] = [
     id: 'uplink-twf-data',
     title: 'Time Waveform Data Uplink',
     section: SectionType.UPLINKS,
-    content: `Carries the actual raw waveform data.
-    
-    **Packet Type:** 1 (Intermediate Segment) or 5 (Last Segment).
-    
-    If configured for a single axis, data samples are sequential for that axis. If configured for all axes, samples are interleaved (Axis 1, Axis 2, Axis 3, etc.).`,
+    content: `Carries the actual raw waveform data. If configured for a single axis, data samples are sequential for that axis. If configured for all axes, samples are interleaved (Axis 1, Axis 2, Axis 3, etc.).`,
     packetTable: {
       packetType: '1 or 5',
       fields: [
@@ -124,11 +106,7 @@ const v1_01_Data: WikiPage[] = [
     id: 'uplink-upgrade-status',
     title: 'Upgrade Verification Status',
     section: SectionType.UPLINKS,
-    content: `Sent during OTA firmware upgrade to report missing blocks.
-    
-    **Packet Type:** 17
-    
-    If all data is received, the packet is 3 bytes long: **0x11 0x00 0x00**.`,
+    content: `Sent during OTA firmware upgrade to report missing blocks. If all data is received, the packet is 3 bytes long: 0x11 0x00 0x00.`,
     packetTable: {
       packetType: 17,
       fields: [
@@ -145,23 +123,21 @@ const v1_01_Data: WikiPage[] = [
     id: 'downlink-config',
     title: 'Configuration Downlink',
     section: SectionType.DOWNLINKS,
-    content: `Configures the AirVibe sensor parameters.
-    
-    **Port:** 30`,
+    content: `Configures the AirVibe sensor parameters.`,
     packetTable: {
       port: 30,
       fields: [
         { byte: '0', name: 'Version', description: 'Protocol Version (Default 2)', default: '2' },
-        { byte: '1', name: 'Push Mode', description: '1=Overall, 2=Waveform, 3=Both', default: '0x01' },
-        { byte: '2', name: 'Axis', description: 'Bitmask (0x07 for all)', default: '0x07' },
-        { byte: '3', name: 'Accel Range', description: '2g, 4g, 8g, 16g', default: '8' },
-        { byte: '4', name: 'Hardware Filter', description: 'See Filter Table (Default 129)', default: '129' },
+        { byte: '1', name: 'Push Mode', description: '0x01: Overall, 0x02: Time Waveform, 0x03: Dual Mode (Overalls Interspersed with Time Waveform Packets)', default: '0x01' },
+        { byte: '2', name: 'Axis', description: 'Bitmask of active axes. axis_1_only = 0x01, axis_2_only = 0x02, axis_3_only = 0x04, all_axes = 0x07', default: '0x07' },
+        { byte: '3', name: 'Accel Range', description: '2g, 4g, 8g, 16g (special order - 32g, 64g)', default: '8' },
+        { byte: '4', name: 'Hardware Filter', description: '0 – no filter, 23 - High Pass - 33 Hz, 22 - High Pass - 67 Hz, 21 - High Pass - 134 Hz, 20 - High Pass - 267 Hz, 19 - High Pass - 593 Hz, 18 - Hig3h Pass - 1335 Hz, 17 - High Pass - 2670 Hz, 135 - Low Pass - 33 Hz, 134 - Low Pass - 67 Hz, 133 - Low Pass - 134 Hz, 132 - Low Pass - 267 Hz, 131 - Low Pass - 593 Hz, 130 - Low Pass - 1335 Hz, 129 - Low Pass - 2670 Hz, 128 - Low Pass - 6675 Hz', default: '129' },
         { byte: '5-6', name: 'TWF Push Period', description: 'Minutes (15 - 44640)', default: '15' },
         { byte: '7-8', name: 'Overall Push Period', description: 'Minutes (1 - 744)', default: '5' },
         { byte: '9-10', name: 'Sample Count', description: '1..12288 (1 axis) or 4096 (3 axis)', default: '210' },
         { byte: '11-12', name: 'High Pass Filter', description: 'Hz (0 - 65535)', default: '2' },
         { byte: '13-14', name: 'Low Pass Filter', description: 'Hz (0 - 65535)', default: '5000' },
-        { byte: '15', name: 'Window Function', description: '0=None, 1=Hanning, etc.', default: '1' },
+        { byte: '15', name: 'Window Function', description: '0= "None", 1= "Hanning", 2= "InverseHanning", 3= "Hamming", 4= "InverseHamming"', default: '1' },
         { byte: '16-17', name: 'Alarm Test Period', description: 'Minutes', default: '1' },
         { byte: '18-19', name: 'Machine Off Threshold', description: 'mg', default: '30' },
       ]
@@ -170,19 +146,12 @@ const v1_01_Data: WikiPage[] = [
   {
     id: 'downlink-alarms',
     title: 'Alarms Downlink',
-    section: SectionType.ALARMS,
-    content: `Sets alarm thresholds.
-    
-    **Port:** 31
-    
-    **Bitmask (Bytes 0-1):**
-    *   **0x01:** Temperature
-    *   **0x02, 0x04, 0x08:** Accel Axis 1, 2, 3
-    *   **0x10, 0x20, 0x40:** Vel Axis 1, 2, 3`,
+    section: SectionType.DOWNLINKS, // Moved from ALARMS
+    content: `Sets alarm thresholds.`,
     packetTable: {
       port: 31,
       fields: [
-        { byte: '0-1', name: 'Alarms Bitmask', description: 'Enables specific alarms' },
+        { byte: '0-1', name: 'Alarms Bitmask', description: 'Enables specific alarms: 0x01=Temp, 0x02=Acc1, 0x04=Acc2, 0x08=Acc3, 0x10=Vel1, 0x20=Vel2, 0x40=Vel3' },
         { byte: '2-3', name: 'Temp Level', description: 'Degrees C' },
         { byte: '4-9', name: 'Accel Levels', description: 'Thresholds for Axis 1, 2, 3 (milli-g)' },
         { byte: '10-15', name: 'Velocity Levels', description: 'Thresholds for Axis 1, 2, 3 (milli-ips)' },
@@ -194,15 +163,12 @@ const v1_01_Data: WikiPage[] = [
     title: 'Command Downlink',
     section: SectionType.DOWNLINKS,
     content: `Requests actions from the sensor.
-    
-    **Port:** 22
-    
-    **Commands:**
-    *   1: Request sending current TWF packet
-    *   2: Request current configuration
-    *   3: Request new TWF
-    *   5: Initialize Upgrade Session (Requires 4-byte file size payload)
-    *   6: Verify updated upgrade image`,
+    Commands:
+    0x0001: Request sending current TWF packet
+    0x0002: Request current configuration
+    0x0003: Request new TWF
+    0x0005: Initialize Upgrade Session (Requires 4-byte file size payload)
+    0x0006: Verify updated upgrade image`,
     packetTable: {
       port: 22,
       fields: [
@@ -215,9 +181,7 @@ const v1_01_Data: WikiPage[] = [
     id: 'downlink-upgrade',
     title: 'Upgrade Data Downlink',
     section: SectionType.DOWNLINKS,
-    content: `Transfers firmware image data.
-    
-    **Port:** 25`,
+    content: `Transfers firmware image data.`,
     packetTable: {
       port: 25,
       fields: [
@@ -247,6 +211,75 @@ const v1_01_Data: WikiPage[] = [
     *   Logic: If the measured acceleration is below this threshold, the system decides the machine is off. The sensor may skip data transmission or flag the data accordingly.`
   },
 
+  // --- ALARMS ---
+  {
+    id: 'alarm-logic',
+    title: 'Alarm Logic',
+    section: SectionType.ALARMS,
+    content: `AirVibe uses a 15-second trip delay to avoid spurious alarms while still conserving battery. The sequence works like this:
+
+    After each waveform capture and processing, the sensor checks for an alarm condition.
+    • If no alarm is detected, nothing is transmitted and the node returns to sleep.
+    • If an alarm is detected, the sensor waits 5 seconds, captures again, and rechecks.
+    • If the second check still shows an alarm, it waits another 5 seconds and performs a third check.
+    • If all three checks show an alarm, the sensor sends an overall payload containing the alarm-source byte (not just a binary alarm flag).
+    
+    **Machine-off logic always runs first.**
+    If the machine is off, the sensor skips vibration processing and alarm checks entirely.
+    
+    **Alarm-source reporting:**
+    Instead of sending a 0/1 flag, the payload includes a byte indicating which condition caused the alarm (acceleration, velocity, temperature, etc.).
+    
+    **Skip unnecessary calculations to save power:**
+    • If an alarm threshold exists only for acceleration, the sensor skips velocity calculation during alarm checks.
+    • If the alarm threshold exists only for temperature, the sensor skips all vibration processing during alarm checks.
+    
+    **When an alarm check overlaps with an overall measurement cycle:**
+    The sensor avoids double computation. It uses the already-computed overalls for the first alarm check.
+    In this overlap case, it also avoids sending duplicate packets—only the overall packet is transmitted, with the alarm-source byte set appropriately.`,
+    mermaidDiagram: `sequenceDiagram
+    autonumber
+    participant M as Machine
+    participant S as AirVibe Sensor
+    participant C as Cloud / Backend
+
+    M->>S: Machine state & signals (vibration, temp)
+    S->>S: Check machine state
+
+    alt Machine OFF
+        S-->>S: Skip vibration processing & alarm checks
+        S-->>S: Go to sleep
+    else Machine ON
+        S->>S: Capture waveform & compute overalls (if scheduled)
+
+        Note over S: If overall calc is running,<br/>reuse these results for Alarm Check #1
+
+        S->>S: Alarm Check #1
+        alt No alarm
+            S-->>S: Nothing to push
+            S-->>S: Go to sleep
+        else Alarm detected
+            Note over S: Apply shortcuts:<br/>• Accel-only alarm → skip velocity calc<br/>• Temp-only alarm → skip vibration processing
+
+            loop Up to 2 more checks (5 s apart)
+                S-->>S: Wait 5 seconds
+                S->>S: Capture again (only needed channels)
+                S->>S: Recompute metrics
+                S->>S: Alarm Check #2 / #3
+            end
+
+            alt Alarm still present after 3 checks
+                S->>S: Build overall payload<br/>+ alarm-source byte
+                S->>C: Send overall payload<br/>with alarm source
+                S-->>S: Go to sleep
+            else Alarm cleared
+                S-->>S: Nothing to push
+                S-->>S: Go to sleep
+            end
+        end
+    end`
+  },
+
   // --- TIME WAVEFORM DATA (Renamed from Technical & Processes) ---
   {
     id: 'fft-conversion',
@@ -273,38 +306,47 @@ const v1_01_Data: WikiPage[] = [
     title: 'Time Waveform Collection Process',
     section: SectionType.TIME_WAVEFORM, // Moved from Processes
     content: `
-    1.  **Trigger:** Configured schedule or Command 3.
-    2.  **Collection:** Sensor wakes up, collects data.
-    3.  **Initiation:** Sensor sends **Info Uplink (Type 3)**.
-    4.  **Handshake:** Gateway records timestamp and sends **Ack Downlink (Port 4)**. (Note: Sensor proceeds even if Ack is lost).
-    5.  **Transfer:** Sensor sends segments via **Data Uplink (Type 1)**.
-    6.  **Completion:** Last segment sent as **Data Uplink (Type 5)**.
-    7.  **Verification:** Gateway checks for missing segments.
-        *   If missing: Sends **Missing Segments Downlink (Port 21)**.
-        *   If complete: Sends **Data Ack Downlink (Port 6)**.
-    8.  **Sleep:** Sensor returns to idle.
+1. Information Uplink: Device sends Time Waveform Information Uplink (Type 03) to the LoRa Network / Application Server.
+2. Logging: Server logs the timestamp, TxID, and waveform parameters.
+3. Information Ack: Server sends Time Waveform Information Acknowledge Downlink (fPort 20, Type 03) to the device.
+4. Early Segments (optional): If data segments arrive before the information uplink, the server inserts each segment and updates the segment bitmap as they come in.
+5. Main Transfer Loop: For each subsequent waveform segment, the device sends Time Waveform Data Uplink – normal segment (Type 01), and the server inserts the segment and updates the bitmap.
+6. Final Segment: The device sends the Time Waveform Data Uplink – final segment (Type 05).
+7. Verification / Missing Segments: The server assembles the waveform and verifies completeness.
+8. If missing segments are detected: server sends Time Waveform Missing Segments Downlink (fPort 21).
+9. Commit & Final Ack: Once all segments are present, the server commits the waveform and marks it complete, then sends Time Waveform Data Acknowledge Downlink (fPort 20, Type 01) to the device.
     `,
     mermaidDiagram: `sequenceDiagram
-    participant Sensor as AirVibe TPM
-    participant Gateway
-    
-    Note over Sensor: Wake & Collect Data
-    Sensor->>Gateway: Uplink Type 3 (Info)
-    Gateway-->>Sensor: Downlink Port 4 (Info Ack)
-    
-    loop Data Transfer
-        Sensor->>Gateway: Uplink Type 1 (Data Segment)
-    end
-    
-    Sensor->>Gateway: Uplink Type 5 (Last Segment)
-    
-    alt Missing Segments
-        Gateway-->>Sensor: Downlink Port 21 (Missing Segments)
-        Sensor->>Gateway: Uplink Type 1 (Resend Data)
-    else All Received
-        Gateway-->>Sensor: Downlink Port 6 (Data Ack)
-        Note over Sensor: Go to Sleep
-    end`
+  participant Dev as Device
+  participant Act as Gateway
+  participant MQ as LoRa Network/Application Server
+
+
+  %% --- Start of waveform ---
+  Dev->>MQ: Time Waveform Information Uplink (Type 03)
+  MQ->>MQ: Log Timestamp, TxID, + Parameters
+  MQ->>Dev: Time Waveform Information Acknowledge Downlink (fPort 20, Type 03)
+
+  %% --- Segments may arrive before TWIU ---
+  alt TWIU not yet received
+    Dev->>MQ: Time Waveform Data Uplink - normal segment (Type 01)
+    MQ->>MQ: Insert segment + update bitmap
+  end
+
+  %% --- Main transfer loop ---
+  loop Each subsequent segment
+    Dev->>MQ: Time Waveform Data Uplink - normal segment (Type 01)
+    MQ->>MQ: Insert segment + update bitmap
+  end
+
+  %% --- Finalization ---
+  Dev->>MQ: Time Waveform Data Uplink - final segment (Type 05)
+  MQ->>MQ: Assemble and verify
+    opt Missing segments detected
+    MQ->>Dev: Time Waveform Missing Segments Downlink (fPort 21)
+  end
+  MQ->>Dev: Commit waveform and mark complete
+  MQ->>Dev: Time Waveform Data Acknowledge Downlink (fPort 20, Type 01)`
   },
 
   // --- FUOTA (Renamed from Processes) ---
@@ -324,26 +366,52 @@ const v1_01_Data: WikiPage[] = [
         *   If complete (CRC OK): Sensor applies update and reboots.
     `,
     mermaidDiagram: `sequenceDiagram
-    participant Gateway
-    participant Sensor as AirVibe TPM
+  autonumber
+  participant LRC as LoRaWAN App
+  participant GW as Gateway
+  participant TPM as AirVibe
 
-    Gateway->>Sensor: Cmd 5 (Init Upgrade)
-    Note over Sensor: Switch to Class C
-    
-    loop Firmware Stream
-        Gateway->>Sensor: Port 25 (Data Block N)
+  Note over LRC,TPM: Get a Machine Saver TPM/VSM Factory Upgrade.bin File (customers cannot create)
+
+  LRC->>GW: Command_Downlink - [Init_Upload]<br> Port: 22 <br> 0x0005 + upgrade.bin_bytesize (4 Bytes BigEndian)
+  GW->>TPM: Command_Downlink - [Init_Upload]<br> Port: 22 <br> 0x0005 + upgrade.bin_bytesize (4 Bytes BigEndian)
+  TPM->>TPM: Enter Class C Mode
+  TPM-->>GW: Init_Upload_Ack_Uplink <br> Type_16 (0x10) <br> (1 Byte, Error Code=0)
+  GW->>GW: Enter Class C Mode
+  GW-->>LRC: Init_Upload_Ack_Uplink <br> Type_16 (0x10) <br> (1 Byte, Error Code=0)
+  
+  Note over LRC,TPM: App sends upgrade.bin chunked into data blocks n=0..N-1 (51 Bytes, 16-bit Blocks, BigEndian)
+  loop Data blocks
+    LRC->>GW: Upgrade_Data_Downlink <br> Port: 25 <br> block_num (2 Bytes BigEndian) + upgrade.bin_chunk (51 Bytes BigEndian)
+    GW->>TPM: Upgrade_Data_Downlink <br> Port: 25 <br> block_num (2 Bytes BigEndian) + upgrade.bin_chunk (51 Bytes BigEndian)
+  end
+  Note over LRC,TPM: If upgrade.bin size/51 has a remainder, then the last block will be shorter.
+
+  LRC->>GW: Command_Downlink - [Verify_Data]<br> Port: 22 <br> 0x0006
+  GW->>TPM: Command_Downlink - [Verify_Data]<br> Port: 22 <br> 0x0006
+  TPM->>GW: Data_Verification_Status_Uplink <br>Packet Type:17 (0x11) <br>(flag=1, count<=25, list)
+  GW->>LRC: Data_Verification_Status_Uplink <br>Packet Type:17 (0x11) <br>(flag=1, count<=25, list)
+  LRC->>LRC: Check Missing Data Blocks
+
+  alt Data_Verification_Status_Uplink has Missing Data Blocks
+    loop Resend Missing & Verify Until No Missing Blocks Remain
+      LRC->>GW: Port_25 resend Upgrade_Data_Downlink block n {b1..bN}
+      GW->>TPM: Port_25 resend Upgrade_Data_Downlink block n {b1..bN}
+      LRC->>GW: Command_Downlink - [Verify_Data]<br> Port: 22 <br> 0x0006 
+      GW->>TPM: Command_Downlink - [Verify_Data]<br> Port: 22 <br> 0x0006
+      TPM-->>GW: Data_Verification_Status_Uplink <br>Type_17 (0x11) <br>(flag=0, count=0)
+      GW-->>LRC: Data_Verification_Status_Uplink <br>Type_17 (0x11) <br>(flag=0, count=0)
     end
-    
-    Gateway->>Sensor: Cmd 6 (Verify)
-    Sensor->>Gateway: Uplink 17 (Missing Blocks?)
-    
-    opt Missing Blocks
-        Gateway->>Sensor: Port 25 (Resend Block X)
-        Gateway->>Sensor: Cmd 6 (Verify)
-        Sensor->>Gateway: Uplink 17 (All Received)
-    end
-    
-    Note over Sensor: Apply FW & Reboot`
+  else No blocks missed
+    TPM->>TPM: CRC16 validate image
+    TPM->>TPM: Selects Upgrade Target <br> VSM or TPM <br> (based on internal hardware code)
+    TPM->>TPM: Apply Upgrade
+    TPM->>TPM: Reverts Back to Class A
+  end
+
+  TPM-->>LRC: Upgrade_Status_Uplink
+  LRC-->>GW: Upgrade_Status_Uplink
+  GW->>GW: Switch to Class A`
   }
 ];
 
