@@ -43,13 +43,13 @@ function App() {
   // Define strict section order
   const sections = [
     SectionType.OVERVIEW,
-    SectionType.UPLINKS,
-    SectionType.DOWNLINKS,
     SectionType.CONFIG_MODES,
+    SectionType.DECODER,
+    SectionType.DOWNLINKS,
+    SectionType.UPLINKS,
     SectionType.ALARMS,
     SectionType.TIME_WAVEFORM,
     SectionType.FUOTA,
-    SectionType.DECODER,
   ];
 
   // Group pages by section based on ACTIVE version data
@@ -131,7 +131,7 @@ function App() {
             Feedback
           </a>
           <div className="text-xs text-slate-500 text-center">
-            &copy; 2025 Machine Saver, Inc.
+            &copy; 2026 Machine Saver, Inc.
           </div>
         </div>
       </aside>
