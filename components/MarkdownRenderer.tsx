@@ -121,6 +121,21 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ text, className = "
       continue;
     }
 
+    // Images: ![alt](src)
+    const imgMatch = line.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+    if (imgMatch) {
+      elements.push(
+        <figure key={i} className="my-4">
+          <img src={imgMatch[2]} alt={imgMatch[1]} className="rounded-lg shadow-md max-w-full" />
+          {imgMatch[1] && (
+            <figcaption className="text-sm text-slate-500 mt-2 text-center">{imgMatch[1]}</figcaption>
+          )}
+        </figure>
+      );
+      i++;
+      continue;
+    }
+
     // Regular paragraph
     elements.push(
       <p key={i} className="my-2 text-slate-700 leading-relaxed">
