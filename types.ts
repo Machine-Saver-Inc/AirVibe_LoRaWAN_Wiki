@@ -1,6 +1,7 @@
 
 export enum SectionType {
   OVERVIEW = 'Overview',
+  QUICKSTART = 'Quickstart Plan',
   UPLINKS = 'Uplinks',
   DOWNLINKS = 'Downlinks',
   CONFIG_MODES = 'Configuration & Modes',

@@ -1,0 +1,41 @@
+sequenceDiagram
+    autonumber
+    participant M as Machine
+    participant S as AirVibe Sensor
+    participant C as Cloud / Backend
+
+    M->>S: Machine state & signals (vibration, temp)
+    S->>S: Check machine state
+
+    alt Machine OFF
+        S-->>S: Skip vibration processing & alarm checks
+        S-->>S: Go to sleep
+    else Machine ON
+        S->>S: Capture waveform & compute overalls (if scheduled)
+
+        Note over S: If overall calc is running,<br/>reuse these results for Alarm Check #1
+
+        S->>S: Alarm Check #1
+        alt No alarm
+            S-->>S: Nothing to push
+            S-->>S: Go to sleep
+        else Alarm detected
+            Note over S: Apply shortcuts:<br/>• Accel-only alarm → skip velocity calc<br/>• Temp-only alarm → skip vibration processing
+
+            loop Up to 2 more checks (5 s apart)
+                S-->>S: Wait 5 seconds
+                S->>S: Capture again (only needed channels)
+                S->>S: Recompute metrics
+                S->>S: Alarm Check #2 / #3
+            end
+
+            alt Alarm still present after 3 checks
+                S->>S: Build overall payload<br/>+ alarm-source byte
+                S->>C: Send overall payload<br/>with alarm source
+                S-->>S: Go to sleep
+            else Alarm cleared
+                S-->>S: Nothing to push
+                S-->>S: Go to sleep
+            end
+        end
+    end

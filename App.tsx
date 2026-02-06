@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Menu, X, Book, Database, Activity, Settings, Cpu, Radio, Code, MessageSquare } from 'lucide-react';
+import { Menu, X, Book, Database, Activity, Settings, Cpu, Radio, Code, MessageSquare, Rocket } from 'lucide-react';
 import { versionHistory } from './data/wikiContent';
 import PacketTable from './components/PacketTable';
 import MermaidDiagram from './components/MermaidDiagram';
@@ -43,6 +43,7 @@ function App() {
   // Define strict section order
   const sections = [
     SectionType.OVERVIEW,
+    SectionType.QUICKSTART,
     SectionType.CONFIG_MODES,
     SectionType.DECODER,
     SectionType.DOWNLINKS,
@@ -62,6 +63,7 @@ function App() {
   const getIconForSection = (section: SectionType) => {
     switch (section) {
       case SectionType.OVERVIEW: return <Book className="w-5 h-5" />;
+      case SectionType.QUICKSTART: return <Rocket className="w-5 h-5" />;
       case SectionType.UPLINKS: return <Radio className="w-5 h-5" />;
       case SectionType.DOWNLINKS: return <Database className="w-5 h-5" />;
       case SectionType.FUOTA: return <Cpu className="w-5 h-5" />;

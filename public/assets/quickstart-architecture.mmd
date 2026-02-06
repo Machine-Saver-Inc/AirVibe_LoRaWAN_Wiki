@@ -1,0 +1,9 @@
+graph LR
+    A["🔵 AirVibe Sensor<br/>(TPM + VSM)"] -->|"LoRaWAN<br/>Uplinks"| B["📡 Gateway /<br/>Base Station"]
+    B -->|"Packet<br/>Forwarding"| C["☁️ LoRa Network<br/>Server"]
+    C -->|"Application<br/>Integration"| D["🖥️ Application<br/>Server"]
+    D -->|"Dashboards<br/>& Alerts"| E["👤 End User /<br/>Dashboard"]
+    E -.->|"Downlink<br/>Commands"| D
+    D -.->|"Downlink<br/>Queue"| C
+    C -.->|"Scheduled<br/>Downlink"| B
+    B -.->|"LoRaWAN<br/>Downlinks"| A

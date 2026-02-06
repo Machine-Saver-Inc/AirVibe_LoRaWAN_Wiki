@@ -1,4 +1,8 @@
 import { SectionType, WikiPage, WikiVersion } from '../types';
+import quickstartArchitecture from '../public/assets/quickstart-architecture.mmd?raw';
+import alarmLogic from '../public/assets/alarm-logic.mmd?raw';
+import timeWaveformTransfer from '../public/assets/time-waveform-transfer.mmd?raw';
+import firmwareUpgradeOta from '../public/assets/firmware-upgrade-ota.mmd?raw';
 
 const v1_01_Data: WikiPage[] = [
   // --- OVERVIEW ---
@@ -9,6 +13,41 @@ const v1_01_Data: WikiPage[] = [
     content: `Machine Saver's AirVibe sensor utilizes LoRa and LoRaWAN communication protocol to send high-fidelity vibration analysis data (full time waveform) as well as summary data (3 axes of RMS acceleration, 3 axes of RMS velocity, and temperature data) from the TPM (transmission and power module) to a receiving gateway or basestation to various LoRa Network Servers. AirVibe was built for industrial environments and to scale for large enterprise customers. All functions of the AirVibe use standard LoRaWAN protocols (no proprietary communication methods) to accomplish everything from configuration, to updates to data transfer. Anyone with an AirVibe sensor and knowledge of LoRaWAN can use these standard Uplink (Sensor -> Gateway/Base Station) and Downlink (Gateway/Base Station -> Sensor) payloads to manage configuration, alarms, and high-fidelity vibration data transfer.
 
     The system supports LoRaWAN Class A (default) and Class C (during firmware upgrades). All multi-byte fields use **Little Endian** format to comply with the LoRa Alliance TS013-1.0.0 Payload Codec API.`
+  },
+
+  // --- QUICKSTART PLAN ---
+  {
+    id: 'quickstart-plan',
+    title: 'Quickstart Plan',
+    section: SectionType.QUICKSTART,
+    content: `This quickstart guide walks you through getting an AirVibe sensor up and running with your own gateway and network/application server — from zero to fully operational.
+
+### 1. Understand AirVibe & LoRaWAN Basics
+AirVibe is a LoRaWAN Class A condition monitoring sensor that transmits vibration and temperature data. Familiarize yourself with the **Overview** section to understand uplink/downlink communication, payload structure, and the role of each component in the system.
+
+### 2. Acquire Hardware
+You need:
+- **AirVibe sensor** (TPM + VSM)
+- **LoRaWAN gateway or base station** — any standard LoRaWAN gateway that supports your regional frequency plan (e.g. US915, EU868)
+
+### 3. Connect Your Gateway to a LoRa Network Server
+Set up your gateway and register it with your chosen LoRa Network Server (e.g. ChirpStack, The Things Stack, AWS IoT Core for LoRaWAN, Actility, etc.). Ensure the gateway is online and forwarding packets.
+
+### 4. Register the AirVibe Device on Your Network Server
+Create a new LoRaWAN device profile on your Network Server using AirVibe's DevEUI, AppEUI, and AppKey. Use **OTAA** (Over-The-Air Activation) as the join method. The device will join automatically once powered on within gateway range.
+
+### 5. Configure Your Application Server to Receive Data
+Point your Network Server's application integration at your Application Server or data platform. AirVibe uplinks arrive on specific ports — see the **Uplinks** section for packet formats and port numbers.
+
+### 6. Decode Uplink Payloads
+Use the **Decoder** section and the built-in Uplink Decoder tool in this wiki to parse incoming hex payloads into human-readable vibration, temperature, and status data.
+
+### 7. Send Configuration Downlinks
+Customize sensor behavior (push periods, acceleration range, filtering, push mode) by sending downlink commands. Refer to the **Downlinks** and **Configuration & Modes** sections for payload formats and available options.
+
+### 8. Set Up Alarms and Monitoring
+Configure alarm thresholds for temperature, acceleration, and velocity via downlink. The sensor will flag active alarms in its Overall Uplink packets. See the **Alarms** section for details.`,
+    mermaidDiagram: quickstartArchitecture
   },
 
   // --- UPLINKS ---
@@ -237,47 +276,7 @@ const v1_01_Data: WikiPage[] = [
     **When an alarm check overlaps with an overall measurement cycle:**
     The sensor avoids double computation. It uses the already-computed overalls for the first alarm check.
     In this overlap case, it also avoids sending duplicate packets—only the overall packet is transmitted, with the alarm-source byte set appropriately.`,
-    mermaidDiagram: `sequenceDiagram
-    autonumber
-    participant M as Machine
-    participant S as AirVibe Sensor
-    participant C as Cloud / Backend
-
-    M->>S: Machine state & signals (vibration, temp)
-    S->>S: Check machine state
-
-    alt Machine OFF
-        S-->>S: Skip vibration processing & alarm checks
-        S-->>S: Go to sleep
-    else Machine ON
-        S->>S: Capture waveform & compute overalls (if scheduled)
-
-        Note over S: If overall calc is running,<br/>reuse these results for Alarm Check #1
-
-        S->>S: Alarm Check #1
-        alt No alarm
-            S-->>S: Nothing to push
-            S-->>S: Go to sleep
-        else Alarm detected
-            Note over S: Apply shortcuts:<br/>• Accel-only alarm → skip velocity calc<br/>• Temp-only alarm → skip vibration processing
-
-            loop Up to 2 more checks (5 s apart)
-                S-->>S: Wait 5 seconds
-                S->>S: Capture again (only needed channels)
-                S->>S: Recompute metrics
-                S->>S: Alarm Check #2 / #3
-            end
-
-            alt Alarm still present after 3 checks
-                S->>S: Build overall payload<br/>+ alarm-source byte
-                S->>C: Send overall payload<br/>with alarm source
-                S-->>S: Go to sleep
-            else Alarm cleared
-                S-->>S: Nothing to push
-                S-->>S: Go to sleep
-            end
-        end
-    end`
+    mermaidDiagram: alarmLogic
   },
 
   // --- TIME WAVEFORM DATA (Renamed from Technical & Processes) ---
@@ -316,37 +315,7 @@ const v1_01_Data: WikiPage[] = [
 8. If missing segments are detected: server sends Time Waveform Missing Segments Downlink (fPort 21).
 9. Commit & Final Ack: Once all segments are present, the server commits the waveform and marks it complete, then sends Time Waveform Data Acknowledge Downlink (fPort 20, Type 01) to the device.
     `,
-    mermaidDiagram: `sequenceDiagram
-  participant Dev as Device
-  participant Act as Gateway
-  participant MQ as LoRa Network/Application Server
-
-
-  %% --- Start of waveform ---
-  Dev->>MQ: Time Waveform Information Uplink (Type 03)
-  MQ->>MQ: Log Timestamp, TxID, + Parameters
-  MQ->>Dev: Time Waveform Information Acknowledge Downlink (fPort 20, Type 03)
-
-  %% --- Segments may arrive before TWIU ---
-  alt TWIU not yet received
-    Dev->>MQ: Time Waveform Data Uplink - normal segment (Type 01)
-    MQ->>MQ: Insert segment + update bitmap
-  end
-
-  %% --- Main transfer loop ---
-  loop Each subsequent segment
-    Dev->>MQ: Time Waveform Data Uplink - normal segment (Type 01)
-    MQ->>MQ: Insert segment + update bitmap
-  end
-
-  %% --- Finalization ---
-  Dev->>MQ: Time Waveform Data Uplink - final segment (Type 05)
-  MQ->>MQ: Assemble and verify
-    opt Missing segments detected
-    MQ->>Dev: Time Waveform Missing Segments Downlink (fPort 21)
-  end
-  MQ->>Dev: Commit waveform and mark complete
-  MQ->>Dev: Time Waveform Data Acknowledge Downlink (fPort 20, Type 01)`
+    mermaidDiagram: timeWaveformTransfer
   },
 
   // --- FUOTA (Renamed from Processes) ---
@@ -365,53 +334,7 @@ const v1_01_Data: WikiPage[] = [
         *   If missing blocks: Gateway resends specific blocks.
         *   If complete (CRC OK): Sensor applies update and reboots.
     `,
-    mermaidDiagram: `sequenceDiagram
-  autonumber
-  participant LRC as LoRaWAN App
-  participant GW as Gateway
-  participant TPM as AirVibe
-
-  Note over LRC,TPM: Get a Machine Saver TPM/VSM Factory Upgrade.bin File (customers cannot create)
-
-  LRC->>GW: Command_Downlink - [Init_Upload]<br> Port: 22 <br> 0x0005 + upgrade.bin_bytesize (4 Bytes BigEndian)
-  GW->>TPM: Command_Downlink - [Init_Upload]<br> Port: 22 <br> 0x0005 + upgrade.bin_bytesize (4 Bytes BigEndian)
-  TPM->>TPM: Enter Class C Mode
-  TPM-->>GW: Init_Upload_Ack_Uplink <br> Type_16 (0x10) <br> (1 Byte, Error Code=0)
-  GW->>GW: Enter Class C Mode
-  GW-->>LRC: Init_Upload_Ack_Uplink <br> Type_16 (0x10) <br> (1 Byte, Error Code=0)
-  
-  Note over LRC,TPM: App sends upgrade.bin chunked into data blocks n=0..N-1 (51 Bytes, 16-bit Blocks, BigEndian)
-  loop Data blocks
-    LRC->>GW: Upgrade_Data_Downlink <br> Port: 25 <br> block_num (2 Bytes BigEndian) + upgrade.bin_chunk (51 Bytes BigEndian)
-    GW->>TPM: Upgrade_Data_Downlink <br> Port: 25 <br> block_num (2 Bytes BigEndian) + upgrade.bin_chunk (51 Bytes BigEndian)
-  end
-  Note over LRC,TPM: If upgrade.bin size/51 has a remainder, then the last block will be shorter.
-
-  LRC->>GW: Command_Downlink - [Verify_Data]<br> Port: 22 <br> 0x0006
-  GW->>TPM: Command_Downlink - [Verify_Data]<br> Port: 22 <br> 0x0006
-  TPM->>GW: Data_Verification_Status_Uplink <br>Packet Type:17 (0x11) <br>(flag=1, count<=25, list)
-  GW->>LRC: Data_Verification_Status_Uplink <br>Packet Type:17 (0x11) <br>(flag=1, count<=25, list)
-  LRC->>LRC: Check Missing Data Blocks
-
-  alt Data_Verification_Status_Uplink has Missing Data Blocks
-    loop Resend Missing & Verify Until No Missing Blocks Remain
-      LRC->>GW: Port_25 resend Upgrade_Data_Downlink block n {b1..bN}
-      GW->>TPM: Port_25 resend Upgrade_Data_Downlink block n {b1..bN}
-      LRC->>GW: Command_Downlink - [Verify_Data]<br> Port: 22 <br> 0x0006 
-      GW->>TPM: Command_Downlink - [Verify_Data]<br> Port: 22 <br> 0x0006
-      TPM-->>GW: Data_Verification_Status_Uplink <br>Type_17 (0x11) <br>(flag=0, count=0)
-      GW-->>LRC: Data_Verification_Status_Uplink <br>Type_17 (0x11) <br>(flag=0, count=0)
-    end
-  else No blocks missed
-    TPM->>TPM: CRC16 validate image
-    TPM->>TPM: Selects Upgrade Target <br> VSM or TPM <br> (based on internal hardware code)
-    TPM->>TPM: Apply Upgrade
-    TPM->>TPM: Reverts Back to Class A
-  end
-
-  TPM-->>LRC: Upgrade_Status_Uplink
-  LRC-->>GW: Upgrade_Status_Uplink
-  GW->>GW: Switch to Class A`
+    mermaidDiagram: firmwareUpgradeOta
   }
 ];
 

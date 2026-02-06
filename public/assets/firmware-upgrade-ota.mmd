@@ -1,0 +1,47 @@
+sequenceDiagram
+  autonumber
+  participant LRC as LoRaWAN App
+  participant GW as Gateway
+  participant TPM as AirVibe
+
+  Note over LRC,TPM: Get a Machine Saver TPM/VSM Factory Upgrade.bin File (customers cannot create)
+
+  LRC->>GW: Command_Downlink - [Init_Upload]<br> Port: 22 <br> 0x0005 + upgrade.bin_bytesize (4 Bytes BigEndian)
+  GW->>TPM: Command_Downlink - [Init_Upload]<br> Port: 22 <br> 0x0005 + upgrade.bin_bytesize (4 Bytes BigEndian)
+  TPM->>TPM: Enter Class C Mode
+  TPM-->>GW: Init_Upload_Ack_Uplink <br> Type_16 (0x10) <br> (1 Byte, Error Code=0)
+  GW->>GW: Enter Class C Mode
+  GW-->>LRC: Init_Upload_Ack_Uplink <br> Type_16 (0x10) <br> (1 Byte, Error Code=0)
+
+  Note over LRC,TPM: App sends upgrade.bin chunked into data blocks n=0..N-1 (51 Bytes, 16-bit Blocks, BigEndian)
+  loop Data blocks
+    LRC->>GW: Upgrade_Data_Downlink <br> Port: 25 <br> block_num (2 Bytes BigEndian) + upgrade.bin_chunk (51 Bytes BigEndian)
+    GW->>TPM: Upgrade_Data_Downlink <br> Port: 25 <br> block_num (2 Bytes BigEndian) + upgrade.bin_chunk (51 Bytes BigEndian)
+  end
+  Note over LRC,TPM: If upgrade.bin size/51 has a remainder, then the last block will be shorter.
+
+  LRC->>GW: Command_Downlink - [Verify_Data]<br> Port: 22 <br> 0x0006
+  GW->>TPM: Command_Downlink - [Verify_Data]<br> Port: 22 <br> 0x0006
+  TPM->>GW: Data_Verification_Status_Uplink <br>Packet Type:17 (0x11) <br>(flag=1, count<=25, list)
+  GW->>LRC: Data_Verification_Status_Uplink <br>Packet Type:17 (0x11) <br>(flag=1, count<=25, list)
+  LRC->>LRC: Check Missing Data Blocks
+
+  alt Data_Verification_Status_Uplink has Missing Data Blocks
+    loop Resend Missing & Verify Until No Missing Blocks Remain
+      LRC->>GW: Port_25 resend Upgrade_Data_Downlink block n {b1..bN}
+      GW->>TPM: Port_25 resend Upgrade_Data_Downlink block n {b1..bN}
+      LRC->>GW: Command_Downlink - [Verify_Data]<br> Port: 22 <br> 0x0006
+      GW->>TPM: Command_Downlink - [Verify_Data]<br> Port: 22 <br> 0x0006
+      TPM-->>GW: Data_Verification_Status_Uplink <br>Type_17 (0x11) <br>(flag=0, count=0)
+      GW-->>LRC: Data_Verification_Status_Uplink <br>Type_17 (0x11) <br>(flag=0, count=0)
+    end
+  else No blocks missed
+    TPM->>TPM: CRC16 validate image
+    TPM->>TPM: Selects Upgrade Target <br> VSM or TPM <br> (based on internal hardware code)
+    TPM->>TPM: Apply Upgrade
+    TPM->>TPM: Reverts Back to Class A
+  end
+
+  TPM-->>LRC: Upgrade_Status_Uplink
+  LRC-->>GW: Upgrade_Status_Uplink
+  GW->>GW: Switch to Class A
