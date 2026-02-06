@@ -42,7 +42,7 @@ Create a new LoRaWAN device profile on your Network Server using AirVibe's DevEU
 Point your Network Server's application integration at your Application Server or data platform. AirVibe uplinks arrive on specific ports — see the **Uplinks** section for packet formats and port numbers.
 
 ### 6. Decode Uplink Payloads
-Use the **Decoder** section and the built-in Uplink Decoder tool in this wiki to parse incoming hex payloads into human-readable vibration, temperature, and status data.
+Use the **Decoder** section and the built-in Uplink Decoder tool in this wiki to parse incoming hex payloads into human-readable vibration, temperature, and status data. The AirVibe_TS013_Codec_vX.X.X.js may be downloaded from the Decoder section of this wiki. This codec can often be uploaded directly into your LNS (ChirpStack, Actility, etc.) to automatically decode uplinks and downlinks. Start by reviewing the current_configuration uplink packet that AirVibe sends automatically after a successful join.
 
 ### 7. Send Configuration Downlinks
 Customize sensor behavior (push periods, acceleration range, filtering, push mode) by sending downlink commands. Refer to the **Downlinks** and **Configuration & Modes** sections for payload formats and available options.
