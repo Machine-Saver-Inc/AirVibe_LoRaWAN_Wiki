@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Menu, X, Book, Database, Activity, Settings, Cpu, Radio, History, Clock, Code, MessageSquare } from 'lucide-react';
+import { Menu, X, Book, Database, Activity, Settings, Cpu, Radio, Code, MessageSquare } from 'lucide-react';
 import { versionHistory } from './data/wikiContent';
 import PacketTable from './components/PacketTable';
 import MermaidDiagram from './components/MermaidDiagram';
@@ -12,10 +12,9 @@ import { SectionType, WikiPage } from './types';
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<SectionType>(SectionType.OVERVIEW);
-  const [currentVersionIndex, setCurrentVersionIndex] = useState(0);
   const [pendingScrollId, setPendingScrollId] = useState<string | null>(null);
 
-  const currentVersion = versionHistory[currentVersionIndex];
+  const currentVersion = versionHistory[0];
   const activeData = currentVersion.data;
 
   // Handle scrolling after section change
@@ -103,31 +102,6 @@ function App() {
           </button>
         </div>
 
-        {/* Version Selector */}
-        <div className="px-4 py-4 border-b border-slate-800 bg-slate-900/50">
-           <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 block flex items-center gap-2">
-             <History className="w-3 h-3" /> Version History
-           </label>
-           <div className="relative">
-             <select 
-               value={currentVersionIndex}
-               onChange={(e) => setCurrentVersionIndex(Number(e.target.value))}
-               className="w-full bg-slate-800 text-slate-200 text-sm rounded border border-slate-700 p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none"
-             >
-               {versionHistory.map((ver, idx) => (
-                 <option key={ver.version} value={idx}>
-                   v{ver.version} ({ver.date})
-                 </option>
-               ))}
-             </select>
-             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
-               <Clock className="w-3 h-3" />
-             </div>
-           </div>
-           <p className="text-[10px] text-slate-500 mt-2 leading-tight">
-             {currentVersion.description}
-           </p>
-        </div>
 
         <nav className="flex-1 overflow-y-auto py-6 px-3 space-y-1">
           {sections.map((section) => (
@@ -172,11 +146,6 @@ function App() {
             </button>
             <div>
                <h2 className="text-xl font-semibold text-slate-800">{activeSection}</h2>
-               {currentVersionIndex !== 0 && (
-                 <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 mt-1">
-                   Viewing Older Version ({currentVersion.version})
-                 </span>
-               )}
             </div>
           </div>
         </header>
