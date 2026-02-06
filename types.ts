@@ -6,7 +6,7 @@ export enum SectionType {
   CONFIG_MODES = 'Configuration & Modes',
   ALARMS = 'Alarms',
   TIME_WAVEFORM = 'Time Waveform Data',
-  FUOTA = 'FUOTA',
+  FUOTA = 'Firmware Updates (OTA)',
   DECODER = 'Decoder'
 }
 

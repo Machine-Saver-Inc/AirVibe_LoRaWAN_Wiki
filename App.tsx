@@ -64,10 +64,10 @@ function App() {
       case SectionType.OVERVIEW: return <Book className="w-5 h-5" />;
       case SectionType.UPLINKS: return <Radio className="w-5 h-5" />;
       case SectionType.DOWNLINKS: return <Database className="w-5 h-5" />;
-      case SectionType.FUOTA: return <Activity className="w-5 h-5" />;
+      case SectionType.FUOTA: return <Cpu className="w-5 h-5" />;
       case SectionType.CONFIG_MODES: return <Settings className="w-5 h-5" />;
       case SectionType.ALARMS: return <AlertIcon />;
-      case SectionType.TIME_WAVEFORM: return <Cpu className="w-5 h-5" />;
+      case SectionType.TIME_WAVEFORM: return <Activity className="w-5 h-5" />;
       case SectionType.DECODER: return <Code className="w-5 h-5" />;
       default: return <Book className="w-5 h-5" />;
     }
