@@ -36,7 +36,7 @@ You need:
 Set up your gateway and register it with your chosen LoRa Network Server (e.g. ChirpStack, The Things Stack, AWS IoT Core for LoRaWAN, Actility, etc.). Ensure the gateway is online and forwarding packets.
 
 ### 4. Register the AirVibe Device on Your Network Server
-Create a new LoRaWAN device profile on your Network Server using AirVibe's DevEUI, AppEUI, and AppKey. Use **OTAA** (Over-The-Air Activation) as the join method. The device will join automatically once powered on within gateway range.
+Create a new LoRaWAN device profile on your Network Server using AirVibe's DevEUI, AppEUI, and AppKey. This information is available when you scan the QR code on AirVibe TPM and login to Machine Saver's activation portal. Use **OTAA** (Over-The-Air Activation) as the join method. Once you have set this up on your Network Server, wake the AirVibe up using the magnetic switch indicated on the outside of the TPM. The AirVibe TPM will make a wake up sound and (as long as it is within range of the gateway/base station) attempt to join automatically. Success is indicated with a Join-Success tone and failure indicated with a Join-Fail tone.
 
 ### 5. Configure Your Application Server to Receive Data
 Point your Network Server's application integration at your Application Server or data platform. AirVibe uplinks arrive on specific ports — see the **Uplinks** section for packet formats and port numbers.
