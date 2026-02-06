@@ -6,80 +6,6 @@ import { encoderExamples, EncoderExample } from '../data/encoderExamples';
 import { decodeUplink } from '../utils/airvibeDecoder';
 import DownlinkEncoder from './DownlinkEncoder';
 
-// Basic driver template to allow users to download a standard JS file
-const JS_DRIVER_CONTENT = `/**
- * AirVibe LoRaWAN Decoder Driver
- * Version: 2.26
- */
-
-function Decode(fPort, bytes) {
-    var decoded = {};
-    var packetType = bytes[0];
-
-    // Helper functions
-    function readInt16BE(b, offset) {
-        var val = (b[offset] << 8) | b[offset + 1];
-        return (val & 0x8000) ? val - 0x10000 : val;
-    }
-    
-    function readUInt16BE(b, offset) {
-        return (b[offset] << 8) | b[offset + 1];
-    }
-
-    if (packetType === 4) { // Configuration
-        decoded.PacketType = 4;
-        decoded.Version = bytes[1];
-        decoded.PushMode = bytes[2];
-        decoded.AxisMask = bytes[3];
-        decoded.AccelRange = bytes[4];
-        decoded.HardwareFilter = bytes[5];
-        decoded.TWFPushPeriod = readUInt16BE(bytes, 6);
-        decoded.OverallPushPeriod = readUInt16BE(bytes, 8);
-        decoded.NumSamples = readUInt16BE(bytes, 10);
-        decoded.HighPass = readUInt16BE(bytes, 12);
-        decoded.LowPass = readUInt16BE(bytes, 14);
-        decoded.Window = bytes[16];
-        decoded.AlarmPeriod = readUInt16BE(bytes, 17);
-        decoded.AlarmMask = readUInt16BE(bytes, 19);
-        decoded.TempAlarm = readUInt16BE(bytes, 21);
-        // ... acceleration and velocity alarm levels ...
-    }
-    else if (packetType === 2) { // Overall
-        decoded.PacketType = 2;
-        decoded.Status = bytes[1];
-        decoded.AlarmFlag = bytes[2];
-        decoded.Temperature = bytes[3];
-        decoded.Voltage = bytes[4] * 0.023; // approx
-        decoded.Charge = bytes[5];
-        decoded.Accel_X = readUInt16BE(bytes, 7);
-        decoded.Accel_Y = readUInt16BE(bytes, 9);
-        decoded.Accel_Z = readUInt16BE(bytes, 11);
-        decoded.Vel_X = readUInt16BE(bytes, 13);
-        decoded.Vel_Y = readUInt16BE(bytes, 15);
-        decoded.Vel_Z = readUInt16BE(bytes, 17);
-    }
-    else if (packetType === 3) { // Waveform Info
-        decoded.PacketType = 3;
-        decoded.TransID = bytes[1];
-        decoded.SegNum = bytes[2];
-        decoded.AxisSel = bytes[4];
-        decoded.TotalSegments = readUInt16BE(bytes, 5);
-        decoded.Rate = readUInt16BE(bytes, 8);
-        decoded.Samples = readUInt16BE(bytes, 10);
-    }
-    else if (packetType === 1 || packetType === 5) { // Waveform Data
-        decoded.PacketType = packetType;
-        decoded.TransID = bytes[1];
-        decoded.SegNum = readUInt16BE(bytes, 2);
-        decoded.Samples = [];
-        for (var i = 4; i < bytes.length; i += 2) {
-            decoded.Samples.push(readInt16BE(bytes, i));
-        }
-    }
-
-    return decoded;
-}
-`;
 
 const UplinkDecoder: React.FC = () => {
   // Mode State
@@ -151,9 +77,8 @@ const UplinkDecoder: React.FC = () => {
 
   const downloadDriver = () => {
     const element = document.createElement("a");
-    const file = new Blob([JS_DRIVER_CONTENT], {type: 'text/javascript'});
-    element.href = URL.createObjectURL(file);
-    element.download = "AirVibe_TPM_2-26_v001.js";
+    element.href = "assets/AirVibe_TS013_Codec_v2.1.2.js";
+    element.download = "AirVibe_TS013_Codec_v2.1.2.js";
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
@@ -231,7 +156,7 @@ const UplinkDecoder: React.FC = () => {
                 className="flex items-center gap-2 text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-md hover:bg-blue-100 transition-colors self-start sm:self-auto"
             >
                 <Download className="w-3.5 h-3.5" />
-                AirVibe_TPM_2-26_v001.js
+                AirVibe_TS013_Codec_v2.1.2.js
             </button>
         </div>
 
