@@ -7,6 +7,7 @@ import MermaidDiagram from './components/MermaidDiagram';
 import AISearch from './components/AISearch';
 import MarkdownRenderer from './components/MarkdownRenderer';
 import UplinkDecoder from './components/UplinkDecoder';
+import AlarmBitmaskCalculator from './components/AlarmBitmaskCalculator';
 import { SectionType, WikiPage } from './types';
 
 function App() {
@@ -178,6 +179,8 @@ function App() {
                   <div className="mb-8 leading-relaxed whitespace-pre-line text-slate-600">
                     <MarkdownRenderer text={page.content} />
                   </div>
+
+                  {page.id === 'alarm-logic' && <AlarmBitmaskCalculator />}
 
                   {page.mermaidDiagram && (
                     <div className="my-8">
