@@ -6,22 +6,22 @@ sequenceDiagram
 
   Note over LRC,TPM: Get a Machine Saver TPM/VSM Factory Upgrade.bin File (customers cannot create)
 
-  LRC->>GW: Command_Downlink - [Init_Upload]<br> Port: 22 <br> 0x0005 + upgrade.bin_bytesize (4 Bytes BigEndian)
-  GW->>TPM: Command_Downlink - [Init_Upload]<br> Port: 22 <br> 0x0005 + upgrade.bin_bytesize (4 Bytes BigEndian)
+  LRC->>GW: Command_Downlink - [Init_Upload]<br> Port: 22 <br> 0x0500 + upgrade.bin_bytesize (4 Bytes LittleEndian)
+  GW->>TPM: Command_Downlink - [Init_Upload]<br> Port: 22 <br> 0x0500 + upgrade.bin_bytesize (4 Bytes LittleEndian)
   TPM->>TPM: Enter Class C Mode
   TPM-->>GW: Init_Upload_Ack_Uplink <br> Type_16 (0x10) <br> (1 Byte, Error Code=0)
   GW->>GW: Enter Class C Mode
   GW-->>LRC: Init_Upload_Ack_Uplink <br> Type_16 (0x10) <br> (1 Byte, Error Code=0)
 
-  Note over LRC,TPM: App sends upgrade.bin chunked into data blocks n=0..N-1 (51 Bytes, 16-bit Blocks, BigEndian)
+  Note over LRC,TPM: App sends upgrade.bin chunked into data blocks n=0..N-1 (51 Bytes, 16-bit Blocks, LittleEndian)
   loop Data blocks
-    LRC->>GW: Upgrade_Data_Downlink <br> Port: 25 <br> block_num (2 Bytes BigEndian) + upgrade.bin_chunk (51 Bytes BigEndian)
-    GW->>TPM: Upgrade_Data_Downlink <br> Port: 25 <br> block_num (2 Bytes BigEndian) + upgrade.bin_chunk (51 Bytes BigEndian)
+    LRC->>GW: Upgrade_Data_Downlink <br> Port: 25 <br> block_num (2 Bytes LittleEndian) + upgrade.bin_chunk (51 Bytes)
+    GW->>TPM: Upgrade_Data_Downlink <br> Port: 25 <br> block_num (2 Bytes LittleEndian) + upgrade.bin_chunk (51 Bytes)
   end
   Note over LRC,TPM: If upgrade.bin size/51 has a remainder, then the last block will be shorter.
 
-  LRC->>GW: Command_Downlink - [Verify_Data]<br> Port: 22 <br> 0x0006
-  GW->>TPM: Command_Downlink - [Verify_Data]<br> Port: 22 <br> 0x0006
+  LRC->>GW: Command_Downlink - [Verify_Data]<br> Port: 22 <br> 0x0600
+  GW->>TPM: Command_Downlink - [Verify_Data]<br> Port: 22 <br> 0x0600
   TPM->>GW: Data_Verification_Status_Uplink <br>Packet Type:17 (0x11) <br>(flag=1, count<=25, list)
   GW->>LRC: Data_Verification_Status_Uplink <br>Packet Type:17 (0x11) <br>(flag=1, count<=25, list)
   LRC->>LRC: Check Missing Data Blocks
@@ -30,8 +30,8 @@ sequenceDiagram
     loop Resend Missing & Verify Until No Missing Blocks Remain
       LRC->>GW: Port_25 resend Upgrade_Data_Downlink block n {b1..bN}
       GW->>TPM: Port_25 resend Upgrade_Data_Downlink block n {b1..bN}
-      LRC->>GW: Command_Downlink - [Verify_Data]<br> Port: 22 <br> 0x0006
-      GW->>TPM: Command_Downlink - [Verify_Data]<br> Port: 22 <br> 0x0006
+      LRC->>GW: Command_Downlink - [Verify_Data]<br> Port: 22 <br> 0x0600
+      GW->>TPM: Command_Downlink - [Verify_Data]<br> Port: 22 <br> 0x0600
       TPM-->>GW: Data_Verification_Status_Uplink <br>Type_17 (0x11) <br>(flag=0, count=0)
       GW-->>LRC: Data_Verification_Status_Uplink <br>Type_17 (0x11) <br>(flag=0, count=0)
     end
