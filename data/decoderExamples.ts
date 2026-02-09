@@ -10,7 +10,7 @@ export const decoderExamples: DecoderExample[] = [
   {
     id: 'ex1',
     name: 'Configuration',
-    raw: '040201070881000F000500D2000213880100010000000000000000000000000000000001190214001E',
+    raw: '0402010708810f000500d2000200881301010000000000000000000000000000000000190114021e00',
     fPort: 8
   },
   {
@@ -22,43 +22,43 @@ export const decoderExamples: DecoderExample[] = [
   {
     id: 'ex3',
     name: 'Tri-Axial_Waveform_Information(Initial)',
-    raw: '03240000070003814e200015',
+    raw: '0324000007030081204e1500',
     fPort: 8
   },
   {
     id: 'ex4',
     name: 'TriAxial_Waveform_Data_Segment_A',
-    raw: '012400000001000400000002000300000003fffb00010003fff900070003fffc0007000200000002fffd00000004',
+    raw: '012400000100040000000200030000000300fbff01000300f9ff07000300fcff0700020000000200fdff00000400',
     fPort: 8
   },
   {
     id: 'ex5',
     name: 'TriAxial_Waveform_Data_Segment_B',
-    raw: '012400010000fffc00010001fffefffd0000ffff00000001000000000000fffffffffffdffff0000fffd00010000',
+    raw: '012401000000fcff01000100fefffdff0000ffff00000100000000000000fffffffffdffffff0000fdff01000000',
     fPort: 8
   },
   {
     id: 'ex6',
     name: 'TriAxial_Waveform_Data_Segment_C(Final)',
-    raw: '05240002000000010001000000010006fffeffff000000000005fffa00000007fffafffe0004fffbffff0004fff6',
+    raw: '05240200000001000100000001000600feffffff000000000500faff00000700fafffeff0400fbffffff0400f6ff',
     fPort: 8
   },
   {
     id: 'ex7',
     name: 'Axis1_Waveform_Information(Initial)',
-    raw: '032c0000010004814e200053',
+    raw: '032c000001040081204e5300',
     fPort: 8
   },
   {
     id: 'ex8',
     name: 'Axis2_Waveform_Information(Initial)',
-    raw: '032a0000020004814e200053',
+    raw: '032a000002040081204e5300',
     fPort: 8
   },
   {
     id: 'ex9',
     name: 'Axis3_Waveform_Information(Initial)',
-    raw: '032b0000040004814e200053',
+    raw: '032b000004040081204e5300',
     fPort: 8
   }
 ];

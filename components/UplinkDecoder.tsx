@@ -99,7 +99,7 @@ const UplinkDecoder: React.FC = () => {
     const newExample: EncoderExample = {
       id: newId,
       name: 'New Downlink',
-      json: { fPort: 30 }
+      json: { fPort: 30, data: {} }
     };
     setEncExamples([newExample, ...encExamples]);
     setSelectedEncId(newId);
