@@ -178,7 +178,7 @@ export default function FuotaHelper() {
   return (
     <div className="my-8 group/fuota">
       <div className="flex items-center gap-4 mb-6">
-        <h4 className="text-2xl font-bold text-slate-900 group-hover/fuota:text-blue-600 transition-colors">FUOTA Helper</h4>
+        <h4 className="text-2xl font-bold text-slate-900 group-hover/fuota:text-blue-600 transition-colors">Firmware Upgrade Over-The-Air Helper</h4>
         <div className="h-px bg-slate-200 flex-1"></div>
       </div>
       <p className="text-sm text-slate-500 mb-4">
@@ -384,7 +384,7 @@ export default function FuotaHelper() {
         <div className="px-4 py-5 border-t border-slate-200 bg-slate-50">
           <h5 className="text-sm font-semibold text-slate-700 mb-2">How does this work?</h5>
           <p className="text-sm text-slate-600 leading-relaxed mb-2">
-            The FUOTA (Firmware Update Over-The-Air) process splits a firmware binary into 51-byte blocks for transmission over LoRaWAN.
+            The FUOTA (Firmware Upgrade Over-The-Air) process splits a firmware binary into 51-byte blocks for transmission over LoRaWAN.
             The gateway initializes the session, streams data blocks, then verifies receipt. Missing blocks are retransmitted until the sensor confirms a complete image.
           </p>
           <ul className="text-sm text-slate-600 list-disc pl-5 space-y-1">

@@ -217,13 +217,13 @@ function assemble(prev: WaveState, pkt: Packet): WaveState {
     tx.samplesPerAxis = (pkt as ParamsPacket).NumberOfSamplesEachAxis;
     if ([0x07, 0x01, 0x02, 0x04].includes(tx.axisMask)) initSegSizes(tx);
     tx.downlinks = [
-      { label: 'ACK TWIU', port: 20, hex: `03${pkt.TransactionID.toString(16).padStart(2, '0')}` },
+      { label: 'ACK Time Waveform Information Uplink', port: 20, hex: `03${pkt.TransactionID.toString(16).padStart(2, '0')}` },
     ];
   } else {
     const dataPkt = pkt as DataPacket;
     if (!tx.params) {
       tx.sawDataBeforeParams = true;
-      tx.downlinks = [{ label: 'REQ Current TWIU', port: 22, hex: '0001' }];
+      tx.downlinks = [{ label: 'REQ Time Waveform Information Uplink', port: 22, hex: '0001' }];
     }
 
     if (![0x07, 0x01, 0x02, 0x04].includes(tx.axisMask)) {
@@ -602,7 +602,7 @@ export default function WaveformTracker() {
                         {tx.params.AxisSelectionText} &middot; {tx.sr} Hz &middot; {tx.expected} segs &middot; {tx.samplesPerAxis} samples/axis
                       </span>
                     ) : (
-                      <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded">Waiting for TWIU (Type 03)</span>
+                      <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded">Waiting for Time Waveform Information Uplink (Type 03)</span>
                     )}
                   </div>
 

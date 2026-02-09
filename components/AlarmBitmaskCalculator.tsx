@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 
 const alarms = [
-  { name: 'Temp', value: 1 },
+  { name: 'Temperature', value: 1 },
   { name: 'Acceleration Axis 1', value: 2 },
   { name: 'Acceleration Axis 2', value: 4 },
   { name: 'Acceleration Axis 3', value: 8 },
@@ -82,7 +82,7 @@ export default function AlarmBitmaskCalculator() {
             <li><code className="bg-slate-200 px-1 rounded text-xs">16, 32, 64</code> = Velocity Axes</li>
           </ul>
           <p className="text-xs text-slate-400 italic">
-            Example: If you send <strong>66</strong>, the sensor knows the only way to make 66 is <strong>64 + 2</strong>. Therefore, it enables "Velocity Axis 3" and "Accel Axis 1".
+            Example: If you send <strong>66</strong>, the sensor knows the only way to make 66 is <strong>64 + 2</strong>. Therefore, it enables "Velocity Axis 3" and "Acceleration Axis 1".
           </p>
         </div>
       </div>

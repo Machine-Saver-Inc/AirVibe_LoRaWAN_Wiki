@@ -26,14 +26,10 @@ Deployment is automated via GitHub Actions on push to `main`. Requires `GEMINI_A
 ### Key directories
 
 - `components/` — React functional components (AISearch, UplinkDecoder, DownlinkEncoder, PacketTable, MermaidDiagram, MarkdownRenderer)
-- `data/` — Wiki content definitions (`wikiContent.ts` exports `versionHistory`), decoder/encoder example payloads
+- `data/` — Wiki content definitions (`wikiContent.ts` exports `wikiData`), decoder/encoder example payloads
 - `services/` — Gemini API integration (`geminiService.ts`)
 - `utils/` — LoRaWAN payload decoder/encoder logic, CSV export
-- `types.ts` — Core TypeScript interfaces (`WikiPage`, `WikiVersion`, `PacketField`, `SectionType` enum)
-
-### Version history system
-
-All wiki content is versioned. `wikiContent.ts` exports a `versionHistory: WikiVersion[]` array where each version contains a complete `WikiPage[]` dataset. The UI allows switching between versions via dropdown; the entire view re-renders with that version's data.
+- `types.ts` — Core TypeScript interfaces (`WikiPage`, `PacketField`, `SectionType` enum)
 
 ### AI search integration
 

@@ -9,6 +9,9 @@ interface PacketTableProps {
 }
 
 const PacketTable: React.FC<PacketTableProps> = ({ title, packetType, port, fields }) => {
+  const hasValues = fields.some(f => f.values);
+  const hasDefault = fields.some(f => f.default);
+
   return (
     <div className="overflow-hidden rounded-lg border border-slate-200 shadow-sm mt-4 mb-8">
       <div className="bg-slate-100 px-4 py-3 border-b border-slate-200 flex justify-between items-center">
@@ -24,7 +27,10 @@ const PacketTable: React.FC<PacketTableProps> = ({ title, packetType, port, fiel
             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-24">Byte #</th>
             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-48">Field Name</th>
             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Description</th>
-            {fields.some(f => f.default) && (
+            {hasValues && (
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Values</th>
+            )}
+            {hasDefault && (
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-32">Default</th>
             )}
           </tr>
@@ -35,7 +41,10 @@ const PacketTable: React.FC<PacketTableProps> = ({ title, packetType, port, fiel
               <td className="px-6 py-3 text-sm font-mono text-slate-600 whitespace-nowrap">{field.byte}</td>
               <td className="px-6 py-3 text-sm font-medium text-slate-900">{field.name}</td>
               <td className="px-6 py-3 text-sm text-slate-600">{field.description}</td>
-              {fields.some(f => f.default) && (
+              {hasValues && (
+                <td className="px-6 py-3 text-sm text-slate-600 font-mono">{field.values || '-'}</td>
+              )}
+              {hasDefault && (
                 <td className="px-6 py-3 text-sm text-slate-500 font-mono">{field.default || '-'}</td>
               )}
             </tr>

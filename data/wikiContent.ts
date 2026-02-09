@@ -1,10 +1,10 @@
-import { SectionType, WikiPage, WikiVersion } from '../types';
+import { SectionType, WikiPage } from '../types';
 import quickstartArchitecture from '../public/assets/quickstart-architecture.mmd?raw';
 import alarmLogic from '../public/assets/alarm-logic.mmd?raw';
 import timeWaveformTransfer from '../public/assets/time-waveform-transfer.mmd?raw';
 import firmwareUpgradeOta from '../public/assets/firmware-upgrade-ota.mmd?raw';
 
-const v1_01_Data: WikiPage[] = [
+export const wikiData: WikiPage[] = [
   // --- OVERVIEW ---
   {
     id: 'intro',
@@ -61,69 +61,74 @@ Configure alarm thresholds for temperature, acceleration, and velocity via downl
     packetTable: {
       packetType: 4,
       fields: [
-        { byte: '0', name: 'Packet Type', description: 'Always 4' },
+        { byte: '0', name: 'Packet Type', description: 'Identifies packet as Current Configuration', values: '4 (0x04)' },
         { byte: '1', name: 'Version', description: 'Protocol Version' },
-        { byte: '2', name: 'Push Mode', description: '0x01: Overall, 0x02: Time Waveform, 0x03: Dual Mode (Overalls Interspersed with Time Waveform Packets)' },
-        { byte: '3', name: 'Time Waveform Axis', description: 'Bitmask of active axes. axis_1_only = 0x01, axis_2_only = 0x02, axis_3_only = 0x04, all_axes = 0x07' },
-        { byte: '4', name: 'Acceleration Range', description: '2g, 4g, 8g, 16g (special order - 32g, 64g)' },
-        { byte: '5', name: 'Hardware Filter', description: '0 – no filter, 23 - High Pass - 33 Hz, 22 - High Pass - 67 Hz, 21 - High Pass - 134 Hz, 20 - High Pass - 267 Hz, 19 - High Pass - 593 Hz, 18 - Hig3h Pass - 1335 Hz, 17 - High Pass - 2670 Hz, 135 - Low Pass - 33 Hz, 134 - Low Pass - 67 Hz, 133 - Low Pass - 134 Hz, 132 - Low Pass - 267 Hz, 131 - Low Pass - 593 Hz, 130 - Low Pass - 1335 Hz, 129 - Low Pass - 2670 Hz, 128 - Low Pass - 6675 Hz' },
+        { byte: '2', name: 'Push Mode', description: 'Data transmission mode', values: 'overall 1 (0x01) | time_waveform 2 (0x02) | dual_mode 3 (0x03)' },
+        { byte: '3', name: 'Time Waveform Axis', description: 'Bitmask of active axes', values: 'axis_1_only 1 (0x01) | axis_2_only 2 (0x02) | axis_3_only 4 (0x04) | all_axes 7 (0x07)' },
+        { byte: '4', name: 'Acceleration Range', description: 'Accelerometer full-scale range', values: '2 (0x02) | 4 (0x04) | 8 (0x08) | 16 (0x10) | 32 (0x20) | 64 (0x40)' },
+        { byte: '5', name: 'Hardware Filter', description: 'Analog hardware filter setting', values: 'no_filter 0 (0x00) | hp_33Hz 23 (0x17) | hp_67Hz 22 (0x16) | hp_134Hz 21 (0x15) | hp_267Hz 20 (0x14) | hp_593Hz 19 (0x13) | hp_1335Hz 18 (0x12) | hp_2670Hz 17 (0x11) | lp_33Hz 135 (0x87) | lp_67Hz 134 (0x86) | lp_134Hz 133 (0x85) | lp_267Hz 132 (0x84) | lp_593Hz 131 (0x83) | lp_1335Hz 130 (0x82) | lp_2670Hz 129 (0x81) | lp_6675Hz 128 (0x80)' },
         { byte: '6-7', name: 'Time Waveform Push Period', description: 'Minutes between waveform pushes' },
         { byte: '8-9', name: 'Overall Push Period', description: 'Minutes between overall data pushes' },
-        { byte: '10-11', name: 'Waveform Samples Per Axis', description: 'Number of Samples waveforms per configured axis' },
-        { byte: '12-13', name: 'High Pass Filter', description: 'Frequency in Hz' },
-        { byte: '14-15', name: 'Low Pass Filter', description: 'Frequency in Hz' },
-        { byte: '16', name: 'Window Function', description: 'Windowing function ID' },
+        { byte: '10-11', name: 'Waveform Samples Per Axis', description: 'Number of samples per configured axis' },
+        { byte: '12-13', name: 'High Pass Filter', description: 'Digital high pass filter frequency in Hz' },
+        { byte: '14-15', name: 'Low Pass Filter', description: 'Digital low pass filter frequency in Hz' },
+        { byte: '16', name: 'Window Function', description: 'Windowing function applied to waveform', values: 'none 0 (0x00) | hanning 1 (0x01) | inverse_hanning 2 (0x02) | hamming 3 (0x03) | inverse_hamming 4 (0x04)' },
         { byte: '17-18', name: 'Alarm Test Period', description: 'Minutes between alarm checks' },
-        { byte: '19-20', name: 'Alarms bitmask', description: 'Active alarms configuration. temperature = 0x01, acceleration_axis1 = 0x02, acceleration_axis2 = 0x04, acceleration_axis3 = 0x08, velocity_axis1 = 0x10, velocity_axis2 = 0x20, velocity_axis3 = 0x40' },
-        { byte: '21-22', name: 'Temperature Alarm Level', description: 'Threshold for temp alarm' },
-        { byte: '23-28', name: 'Acceleration Alarm Levels', description: '2 bytes per axis (1, 2, 3)' },
-        { byte: '29-34', name: 'Velocity Alarm Levels', description: '2 bytes per axis (1, 2, 3)' },
-        { byte: '35-36', name: 'TPM Firmware Rev', description: 'AirVibe TPM Firmware Version. Firmware Revision Encoding: High byte = Major Number, Low byte = Minor Number.' },
-        { byte: '37-38', name: 'VSM Firmware Rev', description: 'AirVibe VSM Firmware Version. Firmware Revision Encoding: High byte = Major Number, Low byte = Minor Number.' },
+        { byte: '19-20', name: 'Alarms Bitmask', description: 'Active alarms configuration', values: 'temperature 1 (0x01) | acceleration_axis1 2 (0x02) | acceleration_axis2 4 (0x04) | acceleration_axis3 8 (0x08) | velocity_axis1 16 (0x10) | velocity_axis2 32 (0x20) | velocity_axis3 64 (0x40)' },
+        { byte: '21-22', name: 'Temperature Alarm Level', description: 'Threshold for temperature alarm in degrees C' },
+        { byte: '23-24', name: 'Accel Axis 1 Alarm Level', description: 'Acceleration alarm threshold for Axis 1 in milli-g' },
+        { byte: '25-26', name: 'Accel Axis 2 Alarm Level', description: 'Acceleration alarm threshold for Axis 2 in milli-g' },
+        { byte: '27-28', name: 'Accel Axis 3 Alarm Level', description: 'Acceleration alarm threshold for Axis 3 in milli-g' },
+        { byte: '29-30', name: 'Vel Axis 1 Alarm Level', description: 'Velocity alarm threshold for Axis 1 in milli-ips' },
+        { byte: '31-32', name: 'Vel Axis 2 Alarm Level', description: 'Velocity alarm threshold for Axis 2 in milli-ips' },
+        { byte: '33-34', name: 'Vel Axis 3 Alarm Level', description: 'Velocity alarm threshold for Axis 3 in milli-ips' },
+        { byte: '35-36', name: 'TPM Firmware Rev', description: 'AirVibe TPM Firmware Version. High byte = Major, Low byte = Minor.' },
+        { byte: '37-38', name: 'VSM Firmware Rev', description: 'AirVibe VSM Firmware Version. High byte = Major, Low byte = Minor.' },
         { byte: '39-40', name: 'Machine Off Threshold', description: 'Threshold in milli-g' },
       ]
     }
   },
   {
     id: 'uplink-overall',
-    title: 'Overall Uplink',
+    title: 'Overall Uplink / Alarm Uplink',
     section: SectionType.UPLINKS,
-    content: `Transfers summary vibration readings, status, and battery information.`,
+    content: `Transfers summary vibration readings, status, and battery information.
+
+**Note:** Type 7 (Alarm Uplink) uses the same byte structure as Type 2, but the codec returns \`null\` for any measurement field whose corresponding alarm bit is NOT set in the Active Alarm Bitmask (Byte 2). This means when the sensor sends an Alarm Uplink, it only calculates and reports data for channels with active alarms to conserve battery.`,
     packetTable: {
-      packetType: 2,
+      packetType: '2 or 7',
       fields: [
-        { byte: '0', name: 'Packet Type', description: 'Always 2' },
-        { byte: '1', name: 'Status', description: '0 = OK, 1= "UART Read Error", 2= "UART Read Busy", 3= "UART Read Timeout", 4= "UART Write Error", 5= "UART Write Busy", 6= "UART Write Timeout", 7= "Modbus CRC Error", 8= "Vibration Sensor Module (VSM) error", 11= "Timewave API Not Initialized", 12= "Timewave collection timeout", 13= "Timewave Bad Params", 14= "Timewave Read Error", 15= "Timewave processing timeout", 16= "Machine Off", 21= "Missing ack"' },
-        { byte: '2', name: 'Active Alarm Bitmask', description: 'no_alarm = 0x00, temperature = 0x01, acceleration_axis1 = 0x02, acceleration_axis2 = 0x04, acceleration_axis3 = 0x08, velocity_axis1 = 0x10, velocity_axis2 = 0x20, velocity_axis3 = 0x40' },
-        { byte: '3', name: 'Temperature', description: 'Degrees C (Value / 10)' },
-        { byte: '4', name: 'Voltage', description: 'Volts (Value / 10)' },
-        { byte: '5', name: 'Charge Status', description: 'Percentage' },
-        { byte: '6', name: 'Reserved', description: 'Reserved' },
-        { byte: '7-8', name: 'Accel Axis 1', description: 'RMS in milli-g' },
-        { byte: '9-10', name: 'Accel Axis 2', description: 'RMS in milli-g' },
-        { byte: '11-12', name: 'Accel Axis 3', description: 'RMS in milli-g' },
-        { byte: '13-14', name: 'Vel Axis 1', description: 'RMS in milli-ips' },
-        { byte: '15-16', name: 'Vel Axis 2', description: 'RMS in milli-ips' },
-        { byte: '17-18', name: 'Vel Axis 3', description: 'RMS in milli-ips' },
+        { byte: '0', name: 'Packet Type', description: 'Identifies packet as Overall or Alarm Uplink', values: 'overall 2 (0x02) | alarm 7 (0x07)' },
+        { byte: '1', name: 'Status', description: 'Sensor status code', values: 'ok 0 (0x00) | uart_read_error 1 (0x01) | uart_read_busy 2 (0x02) | uart_read_timeout 3 (0x03) | uart_write_error 4 (0x04) | uart_write_busy 5 (0x05) | uart_write_timeout 6 (0x06) | modbus_crc_error 7 (0x07) | vsm_error 8 (0x08) | timewave_api_not_init 11 (0x0B) | timewave_collection_timeout 12 (0x0C) | timewave_bad_params 13 (0x0D) | timewave_read_error 14 (0x0E) | timewave_processing_timeout 15 (0x0F) | machine_off 16 (0x10) | missing_ack 21 (0x15)' },
+        { byte: '2', name: 'Active Alarm Bitmask', description: 'Indicates which alarms are currently active', values: 'no_alarm 0 (0x00) | temperature 1 (0x01) | acceleration_axis1 2 (0x02) | acceleration_axis2 4 (0x04) | acceleration_axis3 8 (0x08) | velocity_axis1 16 (0x10) | velocity_axis2 32 (0x20) | velocity_axis3 64 (0x40)' },
+        { byte: '3', name: 'Temperature', description: 'Degrees C. Signed i8, 1°C steps.' },
+        { byte: '4', name: 'Voltage', description: 'Battery voltage. Formula: (Value × 10 + 2000) / 1000 Volts' },
+        { byte: '5', name: 'Battery Percentage', description: 'Battery charge level as percentage' },
+        { byte: '6-7', name: 'Accel Axis 1', description: 'RMS acceleration in milli-g (u16 LE)' },
+        { byte: '8-9', name: 'Accel Axis 2', description: 'RMS acceleration in milli-g (u16 LE)' },
+        { byte: '10-11', name: 'Accel Axis 3', description: 'RMS acceleration in milli-g (u16 LE)' },
+        { byte: '12-13', name: 'Vel Axis 1', description: 'RMS velocity in milli-ips (u16 LE)' },
+        { byte: '14-15', name: 'Vel Axis 2', description: 'RMS velocity in milli-ips (u16 LE)' },
+        { byte: '16-17', name: 'Vel Axis 3', description: 'RMS velocity in milli-ips (u16 LE)' },
       ]
     }
   },
   {
     id: 'uplink-twf-info',
-    title: 'Time Waveform Info Uplink',
+    title: 'Time Waveform Information Uplink',
     section: SectionType.UPLINKS,
     content: `Initiates a Time Waveform transfer sequence. Contains metadata about the waveform about to be sent.`,
     packetTable: {
       packetType: 3,
       fields: [
-        { byte: '0', name: 'Packet Type', description: 'Always 3' },
-        { byte: '1', name: 'Transaction ID', description: 'Unique ID for the waveform' },
+        { byte: '0', name: 'Packet Type', description: 'Identifies packet as Time Waveform Information', values: '3 (0x03)' },
+        { byte: '1', name: 'Transaction ID', description: 'Unique ID for the waveform transfer' },
         { byte: '2', name: 'Segment Number', description: 'Number of the sent segment' },
-        { byte: '3', name: 'Error Code', description: '0 = OK' },
-        { byte: '4', name: 'Axis Selection', description: 'Bitmask of active axes. axis_1_only = 0x01, axis_2_only = 0x02, axis_3_only = 0x04, all_axes = 0x07' },
-        { byte: '5-6', name: 'Number of Segments', description: 'Total segments in waveform' },
-        { byte: '7', name: 'Hardware Filter', description: 'Filter setting used' },
-        { byte: '8-9', name: 'Sampling Rate', description: 'Rate of acquisition' },
+        { byte: '3', name: 'Error Code', description: 'Waveform collection error status', values: 'ok 0 (0x00)' },
+        { byte: '4', name: 'Axis Selection', description: 'Bitmask of active axes', values: 'axis_1_only 1 (0x01) | axis_2_only 2 (0x02) | axis_3_only 4 (0x04) | all_axes 7 (0x07)' },
+        { byte: '5-6', name: 'Number of Segments', description: 'Total segments in waveform transfer' },
+        { byte: '7', name: 'Hardware Filter', description: 'Hardware filter setting used during collection', values: 'no_filter 0 (0x00) | hp_33Hz 23 (0x17) | hp_67Hz 22 (0x16) | hp_134Hz 21 (0x15) | hp_267Hz 20 (0x14) | hp_593Hz 19 (0x13) | hp_1335Hz 18 (0x12) | hp_2670Hz 17 (0x11) | lp_33Hz 135 (0x87) | lp_67Hz 134 (0x86) | lp_134Hz 133 (0x85) | lp_267Hz 132 (0x84) | lp_593Hz 131 (0x83) | lp_1335Hz 130 (0x82) | lp_2670Hz 129 (0x81) | lp_6675Hz 128 (0x80)' },
+        { byte: '8-9', name: 'Sampling Rate', description: 'Rate of acquisition in samples/s' },
         { byte: '10-11', name: 'Number of Samples', description: 'Samples per axis' },
       ]
     }
@@ -136,10 +141,10 @@ Configure alarm thresholds for temperature, acceleration, and velocity via downl
     packetTable: {
       packetType: '1 or 5',
       fields: [
-        { byte: '0', name: 'Packet Type', description: '1 = Data, 5 = Last Data Segment' },
+        { byte: '0', name: 'Packet Type', description: 'Identifies segment type', values: 'data 1 (0x01) | last_data 5 (0x05)' },
         { byte: '1', name: 'Transaction ID', description: 'Matches Info Uplink' },
-        { byte: '2-3', name: 'Segment Number', description: 'Index (0 to N-1)' },
-        { byte: '4..', name: 'Data Samples', description: 'Variable length raw data' },
+        { byte: '2-3', name: 'Segment Number', description: 'Segment index (0 to N-1)' },
+        { byte: '4..', name: 'Data Samples', description: 'Variable length raw waveform data' },
       ]
     }
   },
@@ -151,9 +156,9 @@ Configure alarm thresholds for temperature, acceleration, and velocity via downl
     packetTable: {
       packetType: 17,
       fields: [
-        { byte: '0', name: 'Packet Type', description: 'Always 17 (0x11)' },
-        { byte: '1', name: 'Missed Data Flag', description: '0 = Complete, 1 = Missing Data' },
-        { byte: '2', name: 'Missed Count', description: 'Number of missed blocks listed here' },
+        { byte: '0', name: 'Packet Type', description: 'Identifies packet as Upgrade Verification Status', values: '17 (0x11)' },
+        { byte: '1', name: 'Missed Data Flag', description: 'Indicates whether data is complete or missing', values: 'complete 0 (0x00) | missing_data 1 (0x01)' },
+        { byte: '2', name: 'Missed Count', description: 'Number of missed blocks listed' },
         { byte: '3-52', name: 'Missed Blocks', description: 'List of 16-bit block numbers (max 25)' },
       ]
     }
@@ -168,34 +173,38 @@ Configure alarm thresholds for temperature, acceleration, and velocity via downl
     packetTable: {
       port: 30,
       fields: [
-        { byte: '0', name: 'Version', description: 'Protocol Version (Default 2)', default: '2' },
-        { byte: '1', name: 'Push Mode', description: '0x01: Overall, 0x02: Time Waveform, 0x03: Dual Mode (Overalls Interspersed with Time Waveform Packets)', default: '0x01' },
-        { byte: '2', name: 'Axis', description: 'Bitmask of active axes. axis_1_only = 0x01, axis_2_only = 0x02, axis_3_only = 0x04, all_axes = 0x07', default: '0x07' },
-        { byte: '3', name: 'Accel Range', description: '2g, 4g, 8g, 16g (special order - 32g, 64g)', default: '8' },
-        { byte: '4', name: 'Hardware Filter', description: '0 – no filter, 23 - High Pass - 33 Hz, 22 - High Pass - 67 Hz, 21 - High Pass - 134 Hz, 20 - High Pass - 267 Hz, 19 - High Pass - 593 Hz, 18 - Hig3h Pass - 1335 Hz, 17 - High Pass - 2670 Hz, 135 - Low Pass - 33 Hz, 134 - Low Pass - 67 Hz, 133 - Low Pass - 134 Hz, 132 - Low Pass - 267 Hz, 131 - Low Pass - 593 Hz, 130 - Low Pass - 1335 Hz, 129 - Low Pass - 2670 Hz, 128 - Low Pass - 6675 Hz', default: '129' },
-        { byte: '5-6', name: 'TWF Push Period', description: 'Minutes (15 - 44640)', default: '15' },
-        { byte: '7-8', name: 'Overall Push Period', description: 'Minutes (1 - 744)', default: '5' },
-        { byte: '9-10', name: 'Sample Count', description: '1..12288 (1 axis) or 4096 (3 axis)', default: '210' },
-        { byte: '11-12', name: 'High Pass Filter', description: 'Hz (0 - 65535)', default: '2' },
-        { byte: '13-14', name: 'Low Pass Filter', description: 'Hz (0 - 65535)', default: '5000' },
-        { byte: '15', name: 'Window Function', description: '0= "None", 1= "Hanning", 2= "InverseHanning", 3= "Hamming", 4= "InverseHamming"', default: '1' },
-        { byte: '16-17', name: 'Alarm Test Period', description: 'Minutes', default: '1' },
-        { byte: '18-19', name: 'Machine Off Threshold', description: 'mg', default: '30' },
+        { byte: '0', name: 'Version', description: 'Protocol Version', values: '2 (0x02)', default: '2' },
+        { byte: '1', name: 'Push Mode', description: 'Data transmission mode', values: 'overall 1 (0x01) | time_waveform 2 (0x02) | dual_mode 3 (0x03)', default: '0x01' },
+        { byte: '2', name: 'Axis', description: 'Bitmask of active axes', values: 'axis_1_only 1 (0x01) | axis_2_only 2 (0x02) | axis_3_only 4 (0x04) | all_axes 7 (0x07)', default: '0x07' },
+        { byte: '3', name: 'Accel Range', description: 'Accelerometer full-scale range in g', values: '2 (0x02) | 4 (0x04) | 8 (0x08) | 16 (0x10) | 32 (0x20) | 64 (0x40)', default: '8' },
+        { byte: '4', name: 'Hardware Filter', description: 'Analog hardware filter setting', values: 'no_filter 0 (0x00) | hp_33Hz 23 (0x17) | hp_67Hz 22 (0x16) | hp_134Hz 21 (0x15) | hp_267Hz 20 (0x14) | hp_593Hz 19 (0x13) | hp_1335Hz 18 (0x12) | hp_2670Hz 17 (0x11) | lp_33Hz 135 (0x87) | lp_67Hz 134 (0x86) | lp_134Hz 133 (0x85) | lp_267Hz 132 (0x84) | lp_593Hz 131 (0x83) | lp_1335Hz 130 (0x82) | lp_2670Hz 129 (0x81) | lp_6675Hz 128 (0x80)', default: '129' },
+        { byte: '5-6', name: 'Time Waveform Push Period', description: 'Minutes between waveform pushes (15 - 44640)', default: '15' },
+        { byte: '7-8', name: 'Overall Push Period', description: 'Minutes between overall data pushes (1 - 744)', default: '5' },
+        { byte: '9-10', name: 'Sample Count', description: 'Samples per axis: 1..12288 (1 axis) or 4096 (3 axis)', default: '210' },
+        { byte: '11-12', name: 'High Pass Filter', description: 'Digital high pass filter frequency in Hz (0 - 65535)', default: '2' },
+        { byte: '13-14', name: 'Low Pass Filter', description: 'Digital low pass filter frequency in Hz (0 - 65535)', default: '5000' },
+        { byte: '15', name: 'Window Function', description: 'Windowing function applied to waveform', values: 'none 0 (0x00) | hanning 1 (0x01) | inverse_hanning 2 (0x02) | hamming 3 (0x03) | inverse_hamming 4 (0x04)', default: '1' },
+        { byte: '16-17', name: 'Alarm Test Period', description: 'Minutes between alarm checks', default: '1' },
+        { byte: '18-19', name: 'Machine Off Threshold', description: 'Threshold in milli-g', default: '30' },
       ]
     }
   },
   {
     id: 'downlink-alarms',
     title: 'Alarms Downlink',
-    section: SectionType.DOWNLINKS, // Moved from ALARMS
+    section: SectionType.DOWNLINKS,
     content: `Sets alarm thresholds.`,
     packetTable: {
       port: 31,
       fields: [
-        { byte: '0-1', name: 'Alarms Bitmask', description: 'Enables specific alarms: 0x01=Temp, 0x02=Acc1, 0x04=Acc2, 0x08=Acc3, 0x10=Vel1, 0x20=Vel2, 0x40=Vel3' },
-        { byte: '2-3', name: 'Temp Level', description: 'Degrees C' },
-        { byte: '4-9', name: 'Accel Levels', description: 'Thresholds for Axis 1, 2, 3 (milli-g)' },
-        { byte: '10-15', name: 'Velocity Levels', description: 'Thresholds for Axis 1, 2, 3 (milli-ips)' },
+        { byte: '0-1', name: 'Alarms Bitmask', description: 'Enables specific alarms', values: 'temperature 1 (0x01) | acceleration_axis1 2 (0x02) | acceleration_axis2 4 (0x04) | acceleration_axis3 8 (0x08) | velocity_axis1 16 (0x10) | velocity_axis2 32 (0x20) | velocity_axis3 64 (0x40)', default: '0x0000' },
+        { byte: '2-3', name: 'Temp Level', description: 'Temperature alarm threshold in degrees C', default: '0' },
+        { byte: '4-5', name: 'Accel Axis 1 Level', description: 'Acceleration alarm threshold for Axis 1 in milli-g', default: '0' },
+        { byte: '6-7', name: 'Accel Axis 2 Level', description: 'Acceleration alarm threshold for Axis 2 in milli-g', default: '0' },
+        { byte: '8-9', name: 'Accel Axis 3 Level', description: 'Acceleration alarm threshold for Axis 3 in milli-g', default: '0' },
+        { byte: '10-11', name: 'Vel Axis 1 Level', description: 'Velocity alarm threshold for Axis 1 in milli-ips', default: '0' },
+        { byte: '12-13', name: 'Vel Axis 2 Level', description: 'Velocity alarm threshold for Axis 2 in milli-ips', default: '0' },
+        { byte: '14-15', name: 'Vel Axis 3 Level', description: 'Velocity alarm threshold for Axis 3 in milli-ips', default: '0' },
       ]
     }
   },
@@ -203,18 +212,12 @@ Configure alarm thresholds for temperature, acceleration, and velocity via downl
     id: 'downlink-command',
     title: 'Command Downlink',
     section: SectionType.DOWNLINKS,
-    content: `Requests actions from the sensor.
-    Commands (Little Endian):
-    1 (0x0100): Request sending current TWF packet
-    2 (0x0200): Request current configuration
-    3 (0x0300): Request new TWF
-    5 (0x0500): Initialize Upgrade Session (Requires 4-byte file size payload)
-    6 (0x0600): Verify updated upgrade image`,
+    content: `Requests actions from the sensor.`,
     packetTable: {
       port: 22,
       fields: [
-        { byte: '0-1', name: 'Command ID', description: 'Command Identifier' },
-        { byte: '2..', name: 'Parameters', description: 'Optional parameters (e.g. File Size for Cmd 5)' },
+        { byte: '0-1', name: 'Command ID', description: 'Command identifier (u16 LE)', values: 'request_current_twf 1 (0x0100) | request_config 2 (0x0200) | request_new_twf 3 (0x0300) | init_upgrade 5 (0x0500) | verify_upgrade 6 (0x0600)' },
+        { byte: '2..', name: 'Parameters', description: 'Optional parameters (e.g. 4-byte file size for Command 5)' },
       ]
     }
   },
@@ -231,6 +234,33 @@ Configure alarm thresholds for temperature, acceleration, and velocity via downl
       ]
     }
   },
+  {
+    id: 'downlink-waveform-ack',
+    title: 'Waveform Acknowledgment Downlink',
+    section: SectionType.DOWNLINKS,
+    content: `Acknowledges receipt of waveform information or waveform data from the sensor.`,
+    packetTable: {
+      port: 20,
+      fields: [
+        { byte: '0', name: 'Opcode', description: 'Acknowledgment type', values: 'waveform_data_ack 1 (0x01) | waveform_info_ack 3 (0x03)' },
+        { byte: '1', name: 'Transaction ID', description: 'Matches the Transaction ID from the uplink being acknowledged' },
+      ]
+    }
+  },
+  {
+    id: 'downlink-missing-segments',
+    title: 'Missing Segments Downlink',
+    section: SectionType.DOWNLINKS,
+    content: `Requests retransmission of missing waveform segments from the sensor.`,
+    packetTable: {
+      port: 21,
+      fields: [
+        { byte: '0', name: 'Value Size Mode', description: 'Determines byte width of segment numbers', values: '1_byte_values 0 (0x00) | 2_byte_values 1 (0x01)' },
+        { byte: '1', name: 'Segment Count', description: 'Number of missing segments listed' },
+        { byte: '2+', name: 'Segment Numbers', description: 'List of missing segment numbers (u8 if mode=0, u16 LE if mode=1)' },
+      ]
+    }
+  },
 
   // --- CONFIG & MODES ---
   {
@@ -238,15 +268,15 @@ Configure alarm thresholds for temperature, acceleration, and velocity via downl
     title: 'Configuration & Modes',
     section: SectionType.CONFIG_MODES,
     content: `The AirVibe sensor operates based on a flexible configuration schedule.
-    
+
     **Push Modes**
     *   **Overall (0x01):** Sends summary RMS data only. Efficient for battery.
     *   **Time Waveform (0x02):** Sends full high-frequency raw data. High bandwidth usage.
     *   **Both (0x03):** Alternates or sends both based on their respective periods.
-    
+
     **Machine Off Function**
     To save power and avoid logging "noise" when a machine is not running, the sensor features a **Machine Off Threshold**.
-    
+
     *   Configured in **Byte 18-19** of Configuration Downlink (Port 30).
     *   Unit: **mg (milli-g)**.
     *   Logic: If the measured acceleration is below this threshold, the system decides the machine is off. The sensor may skip data transmission or flag the data accordingly.`
@@ -264,17 +294,17 @@ Configure alarm thresholds for temperature, acceleration, and velocity via downl
     • If an alarm is detected, the sensor waits 5 seconds, captures again, and rechecks.
     • If the second check still shows an alarm, it waits another 5 seconds and performs a third check.
     • If all three checks show an alarm, the sensor sends an overall payload containing the alarm-source byte (not just a binary alarm flag).
-    
+
     **Machine-off logic always runs first.**
     If the machine is off, the sensor skips vibration processing and alarm checks entirely.
-    
+
     **Alarm-source reporting:**
     Instead of sending a 0/1 flag, the payload includes a byte indicating which condition caused the alarm (acceleration, velocity, temperature, etc.).
-    
+
     **Skip unnecessary calculations to save power:**
     • If an alarm threshold exists only for acceleration, the sensor skips velocity calculation during alarm checks.
     • If the alarm threshold exists only for temperature, the sensor skips all vibration processing during alarm checks.
-    
+
     **When an alarm check overlaps with an overall measurement cycle:**
     The sensor avoids double computation. It uses the already-computed overalls for the first alarm check.
     In this overlap case, it also avoids sending duplicate packets—only the overall packet is transmitted, with the alarm-source byte set appropriately.`,
@@ -305,7 +335,7 @@ Configure alarm thresholds for temperature, acceleration, and velocity via downl
   {
     id: 'process-twf',
     title: 'Time Waveform Collection Process',
-    section: SectionType.TIME_WAVEFORM, // Moved from Processes
+    section: SectionType.TIME_WAVEFORM,
     content: `
 1. Information Uplink: Device sends Time Waveform Information Uplink (Type 03) to the LoRa Network / Application Server.
 2. Logging: Server logs the timestamp, TxID, and waveform parameters.
@@ -323,11 +353,11 @@ Configure alarm thresholds for temperature, acceleration, and velocity via downl
   // --- FUOTA (Renamed from Processes) ---
   {
     id: 'process-ota',
-    title: 'Firmware Upgrade Over The Air', // Renamed title
-    section: SectionType.FUOTA, // Renamed section
+    title: 'Firmware Upgrade Over The Air',
+    section: SectionType.FUOTA,
     content: `
     The Over-The-Air upgrade process allows remote firmware updates.
-    
+
     1.  **Init:** Gateway sends **Command 5 (Port 22)** with image size.
     2.  **Mode Switch:** Sensor switches to LoRaWAN Class C (always listening).
     3.  **Data:** Gateway streams image via **Upgrade Data Downlinks (Port 25)**.
@@ -340,47 +370,3 @@ Configure alarm thresholds for temperature, acceleration, and velocity via downl
   }
 ];
 
-// Create a pseudo "Legacy" version for demonstration
-// 1. Remove Machine Off section (Simulating it wasn't there in 1.0)
-// 2. Remove Machine Off Threshold from Config Downlink
-const v1_00_Data: WikiPage[] = v1_01_Data
-  .filter(p => !p.content.includes('Machine Off')) // Filter out Machine Off content
-  .map(p => {
-    if (p.id === 'downlink-config' && p.packetTable) {
-      // Return a copy of the page with modified packet table
-      return {
-        ...p,
-        packetTable: {
-          ...p.packetTable,
-          fields: p.packetTable.fields.filter(f => f.name !== 'Machine Off Threshold')
-        }
-      };
-    }
-    if (p.id === 'uplink-config' && p.packetTable) {
-         return {
-        ...p,
-        packetTable: {
-          ...p.packetTable,
-          fields: p.packetTable.fields.filter(f => f.name !== 'Machine Off Threshold')
-        }
-      };
-    }
-    return p;
-  });
-
-export const versionHistory: WikiVersion[] = [
-  {
-    version: '1.01E',
-    date: '15 Oct 2025',
-    description: 'Added Machine Off Threshold and TWF Receive Edits',
-    data: v1_01_Data
-  },
-  {
-    version: '1.00',
-    date: '01 Jan 2024',
-    description: 'Initial Release',
-    data: v1_00_Data
-  }
-];
-
-export const wikiData = v1_01_Data; // Default export for backwards compatibility if needed

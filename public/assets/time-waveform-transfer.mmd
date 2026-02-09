@@ -9,8 +9,8 @@ sequenceDiagram
   MQ->>MQ: Log Timestamp, TxID, + Parameters
   MQ->>Dev: Time Waveform Information Acknowledge Downlink (fPort 20, Type 03)
 
-  %% --- Segments may arrive before TWIU ---
-  alt TWIU not yet received
+  %% --- Segments may arrive before Information Uplink ---
+  alt Information Uplink not yet received
     Dev->>MQ: Time Waveform Data Uplink - normal segment (Type 01)
     MQ->>MQ: Insert segment + update bitmap
   end
@@ -27,5 +27,5 @@ sequenceDiagram
     opt Missing segments detected
     MQ->>Dev: Time Waveform Missing Segments Downlink (fPort 21)
   end
-  MQ->>Dev: Commit waveform and mark complete
+  Note over MQ: Commit waveform and mark complete
   MQ->>Dev: Time Waveform Data Acknowledge Downlink (fPort 20, Type 01)

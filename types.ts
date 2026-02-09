@@ -15,6 +15,7 @@ export interface PacketField {
   byte: string;
   name: string;
   description: string;
+  values?: string;
   default?: string;
 }
 
@@ -37,13 +38,6 @@ export interface WikiPage {
   };
   mermaidDiagram?: string;
   extraTable?: TableData;
-}
-
-export interface WikiVersion {
-  version: string;
-  date: string;
-  description: string;
-  data: WikiPage[];
 }
 
 export interface SearchResult {

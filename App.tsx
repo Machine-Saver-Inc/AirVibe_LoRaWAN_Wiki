@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Menu, X, Book, Database, Activity, Settings, Cpu, Radio, Code, MessageSquare, Rocket } from 'lucide-react';
-import { versionHistory } from './data/wikiContent';
+import { wikiData } from './data/wikiContent';
 import PacketTable from './components/PacketTable';
 import MermaidDiagram from './components/MermaidDiagram';
 import AISearch from './components/AISearch';
@@ -17,8 +17,7 @@ function App() {
   const [activeSection, setActiveSection] = useState<SectionType>(SectionType.OVERVIEW);
   const [pendingScrollId, setPendingScrollId] = useState<string | null>(null);
 
-  const currentVersion = versionHistory[0];
-  const activeData = currentVersion.data;
+  const activeData = wikiData;
 
   // Handle scrolling after section change
   useEffect(() => {
