@@ -1,8 +1,8 @@
 sequenceDiagram
     autonumber
     participant M as Machine
-    participant S as AirVibe Sensor
-    participant C as Cloud / Backend
+    participant S as AirVibe
+    participant C as LoRa Network/Application Server
 
     M->>S: Machine state & signals (vibration, temp)
     S->>S: Check machine state
