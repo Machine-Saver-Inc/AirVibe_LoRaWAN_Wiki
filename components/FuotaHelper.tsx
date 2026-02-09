@@ -182,7 +182,7 @@ export default function FuotaHelper() {
         <div className="h-px bg-slate-200 flex-1"></div>
       </div>
       <p className="text-sm text-slate-500 mb-4">
-        Select your <code className="bg-slate-200 px-1 rounded text-xs">upgrade.bin</code> to see the initialization payload, and generate 51-byte FUOTA data blocks as JSON.
+        A tool which builds the commands to handle Firmware Upgrades Over-The-Air using your own gateway/LNS. Select your <code className="bg-slate-200 px-1 rounded text-xs">upgrade.bin</code> and this utility generates the proper Initialize Upgrade command based on the file size, then breaks up the binary into a downloadable JSON or CSV file. Each line of those files may be sent as an Upgrade Data Downlink (Port 25) to the AirVibe. After using this utility you can queue all the Upgrade Data Downlinks to upgrade an AirVibe — the only thing that needs to be handled manually is retransmitting any missed blocks (lines) after inspecting the Upgrade Verification Status Uplink.
       </p>
 
       {toast && (
