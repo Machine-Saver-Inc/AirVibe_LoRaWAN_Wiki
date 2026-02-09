@@ -204,12 +204,12 @@ Configure alarm thresholds for temperature, acceleration, and velocity via downl
     title: 'Command Downlink',
     section: SectionType.DOWNLINKS,
     content: `Requests actions from the sensor.
-    Commands:
-    0x0001: Request sending current TWF packet
-    0x0002: Request current configuration
-    0x0003: Request new TWF
-    0x0005: Initialize Upgrade Session (Requires 4-byte file size payload)
-    0x0006: Verify updated upgrade image`,
+    Commands (Little Endian):
+    0x0100: Request sending current TWF packet
+    0x0200: Request current configuration
+    0x0300: Request new TWF
+    0x0500: Initialize Upgrade Session (Requires 4-byte file size payload)
+    0x0600: Verify updated upgrade image`,
     packetTable: {
       port: 22,
       fields: [
