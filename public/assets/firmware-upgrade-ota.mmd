@@ -10,8 +10,8 @@ sequenceDiagram
   GW->>TPM: Command Downlink - [Initialize Upgrade]<br> Port: 22 <br> 0x0500 + upgrade.bin_bytesize (4 Bytes LittleEndian)
   TPM->>TPM: Enter Class C Mode
   TPM-->>GW: Initialize Upgrade Acknowledgment Uplink <br> Type 16 (0x10) <br> (1 Byte, Error Code=0)
-  GW->>GW: Enter Class C Mode
   GW-->>LRC: Initialize Upgrade Acknowledgment Uplink <br> Type 16 (0x10) <br> (1 Byte, Error Code=0)
+  LRC->>LRC: Updates its profile of the AirVibe <br> to Class C Mode
 
   Note over LRC,TPM: App sends upgrade.bin chunked into data blocks n=0..N-1 (51 Bytes, 16-bit Blocks, LittleEndian)
   loop Data blocks
@@ -22,9 +22,9 @@ sequenceDiagram
 
   LRC->>GW: Command Downlink - [Verify Upgrade]<br> Port: 22 <br> 0x0600
   GW->>TPM: Command Downlink - [Verify Upgrade]<br> Port: 22 <br> 0x0600
-  TPM->>GW: Upgrade Verification Status Uplink <br> Type 17 (0x11) <br>(flag=1, count<=25, list)
-  GW->>LRC: Upgrade Verification Status Uplink <br> Type 17 (0x11) <br>(flag=1, count<=25, list)
-  LRC->>LRC: Check Missing Data Blocks
+  TPM->>GW: Upgrade Verification Status Uplink <br> Type 17 (0x11)
+  GW->>LRC: Upgrade Verification Status Uplink <br> Type 17 (0x11)
+  LRC->>LRC: Check for Missing Data Blocks
 
   alt Upgrade Verification Status Uplink has Missing Data Blocks
     loop Resend Missing & Verify Until No Missing Blocks Remain
@@ -42,6 +42,6 @@ sequenceDiagram
     TPM->>TPM: Reverts Back to Class A
   end
 
-  TPM-->>LRC: Upgrade Verification Status Uplink
-  LRC-->>GW: Upgrade Verification Status Uplink
-  GW->>GW: Switch to Class A
+  TPM-->>GW: Upgrade Verification Status Uplink <br> Type 17 (0x11) <br>(flag=0, count=0)
+  GW-->>LRC: Upgrade Verification Status Uplink <br> Type 17 (0x11) <br>(flag=0, count=0)
+  LRC->>LRC: Updates its profile of the AirVibe <br> back to Class A Mode
