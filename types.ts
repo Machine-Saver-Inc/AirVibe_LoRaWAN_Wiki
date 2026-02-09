@@ -8,7 +8,7 @@ export enum SectionType {
   ALARMS = 'Alarms',
   TIME_WAVEFORM = 'Time Waveform Data',
   FUOTA = 'Firmware Updates (OTA)',
-  DECODER = 'Decoder'
+  DECODER = 'JavaScript Codec Utility'
 }
 
 export interface PacketField {
