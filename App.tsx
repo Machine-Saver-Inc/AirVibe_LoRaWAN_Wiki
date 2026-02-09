@@ -9,6 +9,7 @@ import MarkdownRenderer from './components/MarkdownRenderer';
 import UplinkDecoder from './components/UplinkDecoder';
 import AlarmBitmaskCalculator from './components/AlarmBitmaskCalculator';
 import WaveformTracker from './components/WaveformTracker';
+import FuotaHelper from './components/FuotaHelper';
 import { SectionType, WikiPage } from './types';
 
 function App() {
@@ -183,6 +184,7 @@ function App() {
 
                   {page.id === 'alarm-logic' && <AlarmBitmaskCalculator />}
                   {page.id === 'process-twf' && <WaveformTracker />}
+                  {page.id === 'process-ota' && <FuotaHelper />}
 
                   {page.mermaidDiagram && (
                     <div className="my-8 group/diagram">
