@@ -24,8 +24,11 @@ export default function AlarmBitmaskCalculator() {
   };
 
   return (
-    <div className="my-8">
-      <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">Alarm Bitmask Calculator</h4>
+    <div className="my-8 group/alarm">
+      <div className="flex items-center gap-4 mb-6">
+        <h4 className="text-2xl font-bold text-slate-900 group-hover/alarm:text-blue-600 transition-colors">Alarm Bitmask Calculator</h4>
+        <div className="h-px bg-slate-200 flex-1"></div>
+      </div>
       <p className="text-sm text-slate-500 mb-4">Check the boxes to generate the Alarm Bitmask value to use in the Alarm Downlink.</p>
 
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">

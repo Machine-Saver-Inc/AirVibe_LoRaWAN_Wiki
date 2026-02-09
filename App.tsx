@@ -8,6 +8,7 @@ import AISearch from './components/AISearch';
 import MarkdownRenderer from './components/MarkdownRenderer';
 import UplinkDecoder from './components/UplinkDecoder';
 import AlarmBitmaskCalculator from './components/AlarmBitmaskCalculator';
+import WaveformTracker from './components/WaveformTracker';
 import { SectionType, WikiPage } from './types';
 
 function App() {
@@ -181,10 +182,14 @@ function App() {
                   </div>
 
                   {page.id === 'alarm-logic' && <AlarmBitmaskCalculator />}
+                  {page.id === 'process-twf' && <WaveformTracker />}
 
                   {page.mermaidDiagram && (
-                    <div className="my-8">
-                      <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Process Diagram</h4>
+                    <div className="my-8 group/diagram">
+                      <div className="flex items-center gap-4 mb-6">
+                        <h4 className="text-2xl font-bold text-slate-900 group-hover/diagram:text-blue-600 transition-colors">Process Diagram</h4>
+                        <div className="h-px bg-slate-200 flex-1"></div>
+                      </div>
                       <MermaidDiagram chart={page.mermaidDiagram} />
                     </div>
                   )}
