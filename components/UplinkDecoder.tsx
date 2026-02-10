@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
-import { Plus, X, Copy, Check, Download, ChevronDown, ChevronUp } from 'lucide-react';
+import { Copy, Check, Download } from 'lucide-react';
 import { decoderExamples, DecoderExample } from '../data/decoderExamples';
 import { encoderExamples, EncoderExample } from '../data/encoderExamples';
 import { decodeUplink } from '../utils/airvibeDecoder';
 import DownlinkEncoder from './DownlinkEncoder';
+import ExamplesSidebar from './ExamplesSidebar';
 import { COPY_FEEDBACK_MS } from '../constants';
 
 
@@ -110,7 +111,7 @@ const UplinkDecoder: React.FC = () => {
   const updateEncoderExampleName = (id: string, newName: string) => {
     setEncExamples(encExamples.map(e => e.id === id ? { ...e, name: newName } : e));
   };
-  
+
   const updateEncoderExampleJson = (id: string, newJson: object) => {
     setEncExamples(encExamples.map(e => e.id === id ? { ...e, json: newJson } : e));
   };
@@ -171,8 +172,8 @@ const UplinkDecoder: React.FC = () => {
            <div className="space-y-6 max-w-2xl animate-fade-in pb-10">
               <div>
                 <label className="block text-xs font-medium text-slate-500 uppercase mb-1">Name<span className="text-teal-500">*</span></label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={decName}
                   onChange={(e) => {
                      setDecName(e.target.value);
@@ -184,8 +185,8 @@ const UplinkDecoder: React.FC = () => {
 
               <div>
                 <label className="block text-xs font-medium text-slate-500 uppercase mb-1">Raw Uplink Message<span className="text-teal-500">*</span></label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={decRaw}
                   onChange={(e) => {
                     setDecRaw(e.target.value);
@@ -198,8 +199,8 @@ const UplinkDecoder: React.FC = () => {
               <div className="flex items-end gap-4">
                 <div className="w-32">
                   <label className="block text-xs font-medium text-slate-500 uppercase mb-1">fPort<span className="text-teal-500">*</span></label>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     value={decFPort}
                     onChange={(e) => {
                         const val = parseInt(e.target.value) || 1;
@@ -209,7 +210,7 @@ const UplinkDecoder: React.FC = () => {
                     className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none text-slate-900 text-sm"
                   />
                 </div>
-                <button 
+                <button
                   onClick={onDecodeClick}
                   className="px-6 py-2.5 bg-white border border-teal-600 text-teal-600 font-medium text-sm rounded hover:bg-teal-50 transition-colors uppercase tracking-wide"
                 >
@@ -220,12 +221,12 @@ const UplinkDecoder: React.FC = () => {
               <div className="flex-1 min-h-[300px] flex flex-col">
                  <label className="block text-xs font-medium text-slate-500 uppercase mb-1">Decoded Uplink Message</label>
                  <div className="relative flex-1">
-                   <textarea 
+                   <textarea
                      readOnly
                      value={decoded}
                      className="w-full h-full min-h-[300px] p-4 bg-slate-50 border border-slate-300 rounded font-mono text-xs text-slate-700 resize-none focus:ring-2 focus:ring-teal-500 outline-none"
                    />
-                   <button 
+                   <button
                      onClick={handleDecCopy}
                      className="absolute bottom-4 right-4 bg-teal-600 text-white px-3 py-1.5 rounded text-xs font-medium shadow-sm hover:bg-teal-700 flex items-center gap-1.5 transition-all"
                    >
@@ -239,9 +240,9 @@ const UplinkDecoder: React.FC = () => {
         ) : (
            // --- ENCODER VIEW ---
            <div className="pb-10">
-               <DownlinkEncoder 
+               <DownlinkEncoder
                 key={selectedEncId} // Reset state on example switch
-                initialExample={encExamples.find(e => e.id === selectedEncId) || encExamples[0]} 
+                initialExample={encExamples.find(e => e.id === selectedEncId) || encExamples[0]}
                 onUpdateName={updateEncoderExampleName}
                 onUpdateJson={updateEncoderExampleJson}
                />
@@ -250,73 +251,17 @@ const UplinkDecoder: React.FC = () => {
         </div>
       </div>
 
-      {/* Left Sidebar (Examples) - Collapsible on mobile, always visible on desktop */}
-      <div className="w-full lg:w-1/3 border-t lg:border-t-0 lg:border-r border-slate-200 flex flex-col bg-slate-50 lg:min-h-auto">
-        <div
-          className="p-4 border-b border-slate-200 flex justify-between items-center bg-white sticky top-0 z-10 cursor-pointer lg:cursor-default"
-          onClick={() => setShowExamples(!showExamples)}
-        >
-          <div className="flex items-center gap-2">
-            <h3 className="font-semibold text-slate-800">Examples</h3>
-            <span className="lg:hidden text-slate-400">
-              {showExamples ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-            </span>
-          </div>
-          <button
-            onClick={(e) => { e.stopPropagation(); handleAdd(); setShowExamples(true); }}
-            className={`flex items-center gap-1 text-xs font-medium text-white px-2 py-1.5 rounded transition-colors ${activeTab === 'decode' ? 'bg-teal-600 hover:bg-teal-700' : 'bg-purple-600 hover:bg-purple-700'}`}
-          >
-            <Plus className="w-3 h-3" /> ADD
-          </button>
-        </div>
-        <div className={`flex-1 overflow-y-auto p-2 space-y-2 ${showExamples ? '' : 'hidden lg:block'}`}>
-          {activeExamples.map((ex: DecoderExample | EncoderExample) => (
-            <div 
-              key={ex.id}
-              onClick={() => handleSelectId(ex.id)}
-              className={`group relative p-3 rounded-md cursor-pointer border transition-all ${
-                activeSelectedId === ex.id 
-                  ? activeTab === 'decode' ? 'bg-teal-50 border-teal-200 shadow-sm' : 'bg-purple-50 border-purple-200 shadow-sm'
-                  : 'bg-white border-slate-200 hover:bg-white'
-              } ${activeTab === 'decode' ? 'hover:border-teal-200' : 'hover:border-purple-200'}`}
-            >
-              <div className="flex justify-between items-start pr-6">
-                <span className={`font-medium text-sm truncate ${
-                    activeSelectedId === ex.id 
-                    ? activeTab === 'decode' ? 'text-teal-900' : 'text-purple-900' 
-                    : 'text-slate-700'
-                }`}>
-                  {ex.name}
-                </span>
-                {ex.fPort !== undefined && (
-                   <span className="text-xs font-mono text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
-                     {ex.fPort}
-                   </span>
-                )}
-                 {ex.json?.fPort !== undefined && (
-                   <span className="text-xs font-mono text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
-                     {ex.json.fPort}
-                   </span>
-                )}
-              </div>
-              <div className="text-xs text-slate-400 font-mono mt-1 truncate">
-                 {activeTab === 'decode' ? (ex.raw || "Empty payload") : "JSON Payload"}
-              </div>
-              
-              <button 
-                onClick={(e) => handleRemove(e, ex.id)}
-                className="absolute top-2 right-2 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <X className="w-4 h-4" />
-              </button>
-              
-              {activeSelectedId === ex.id && (
-                <div className={`absolute left-0 top-0 bottom-0 w-1 rounded-l-md ${activeTab === 'decode' ? 'bg-teal-500' : 'bg-purple-500'}`}></div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* Left Sidebar (Examples) */}
+      <ExamplesSidebar
+        activeTab={activeTab}
+        examples={activeExamples}
+        selectedId={activeSelectedId}
+        onSelect={handleSelectId}
+        onRemove={handleRemove}
+        onAdd={handleAdd}
+        showExamples={showExamples}
+        onToggleExamples={() => setShowExamples(!showExamples)}
+      />
 
     </div>
   );
