@@ -269,19 +269,19 @@ Configure alarm thresholds for temperature, acceleration, and velocity via downl
     section: SectionType.CONFIG_MODES,
     content: `The AirVibe sensor operates based on a flexible configuration schedule.
 
-    **Push Modes**
-    *   **overall_only (0x01):** Sends summary RMS data only. Efficient for battery.
-    *   **waveform_only (0x02):** Sends full high-frequency raw data. High bandwidth usage.
-    *   **overall_and_waveform (0x03):** Alternates or sends both based on their respective periods.
+**Push Modes**
+*   **overall_only (0x01):** Sends summary RMS data only. Efficient for battery.
+*   **waveform_only (0x02):** Sends full high-frequency raw data. High bandwidth usage.
+*   **overall_and_waveform (0x03):** Alternates or sends both based on their respective periods.
 
-    **Machine Off Function**
-    To conserve battery and avoid recording meaningless vibration data while the monitored equipment is idle, the sensor includes a configurable **Machine Off Threshold**.
+**Machine Off Function**
+To conserve battery and avoid recording meaningless vibration data while the monitored equipment is idle, the sensor includes a configurable **Machine Off Threshold**.
 
-    *   Configured in **Byte 18-19** of Configuration Downlink (Port 30). Default: **30 mg**.
-    *   Unit: **mg (milli-g)**.
-    *   **Detection:** Before any vibration processing or alarm evaluation, the sensor compares the measured acceleration against this threshold. If the reading falls below it, the machine is considered off.
-    *   **Behavior when off:** The sensor skips all vibration processing and alarm checks, sets the uplink status to \`machine_off\` (status code 16), and returns \`null\` for all vibration and temperature fields. Battery voltage and percentage are still reported.
-    *   **Alarm interaction:** Because the machine-off check runs first in every wake cycle, no alarms can fire while the machine is off — the sensor goes back to sleep immediately.`
+*   Configured in **Byte 18-19** of Configuration Downlink (Port 30). Default: **30 mg**.
+*   Unit: **mg (milli-g)**.
+*   **Detection:** Before any vibration processing or alarm evaluation, the sensor compares the measured acceleration against this threshold. If the reading falls below it, the machine is considered off.
+*   **Behavior when off:** The sensor skips all vibration processing and alarm checks, sets the uplink status to \`machine_off\` (status code 16), and returns \`null\` for all vibration and temperature fields. Battery voltage and percentage are still reported.
+*   **Alarm interaction:** Because the machine-off check runs first in every wake cycle, no alarms can fire while the machine is off — the sensor goes back to sleep immediately.`
   },
 
   // --- ALARMS ---
@@ -291,25 +291,25 @@ Configure alarm thresholds for temperature, acceleration, and velocity via downl
     section: SectionType.ALARMS,
     content: `AirVibe uses a 15-second trip delay to avoid spurious alarms while still conserving battery. The sequence works like this:
 
-    After each waveform capture and processing, the sensor checks for an alarm condition.
-    • If no alarm is detected, nothing is transmitted and the node returns to sleep.
-    • If an alarm is detected, the sensor waits 5 seconds, captures again, and rechecks.
-    • If the second check still shows an alarm, it waits another 5 seconds and performs a third check.
-    • If all three checks show an alarm, the sensor sends an overall payload containing the alarm-source byte (not just a binary alarm flag).
+After each waveform capture and processing, the sensor checks for an alarm condition.
+- If no alarm is detected, nothing is transmitted and the node returns to sleep.
+- If an alarm is detected, the sensor waits 5 seconds, captures again, and rechecks.
+- If the second check still shows an alarm, it waits another 5 seconds and performs a third check.
+- If all three checks show an alarm, the sensor sends an overall payload containing the alarm-source byte (not just a binary alarm flag).
 
-    **Machine-off logic always runs first.**
-    If the machine is off, the sensor skips vibration processing and alarm checks entirely.
+**Machine-off logic always runs first.**
+If the machine is off, the sensor skips vibration processing and alarm checks entirely.
 
-    **Alarm-source reporting:**
-    Instead of sending a 0/1 flag, the payload includes a byte indicating which condition caused the alarm (acceleration, velocity, temperature, etc.).
+**Alarm-source reporting:**
+Instead of sending a 0/1 flag, the payload includes a byte indicating which condition caused the alarm (acceleration, velocity, temperature, etc.).
 
-    **Skip unnecessary calculations to save power:**
-    • If an alarm threshold exists only for acceleration, the sensor skips velocity calculation during alarm checks.
-    • If the alarm threshold exists only for temperature, the sensor skips all vibration processing during alarm checks.
+**Skip unnecessary calculations to save power:**
+- If an alarm threshold exists only for acceleration, the sensor skips velocity calculation during alarm checks.
+- If the alarm threshold exists only for temperature, the sensor skips all vibration processing during alarm checks.
 
-    **When an alarm check overlaps with an overall measurement cycle:**
-    The sensor avoids double computation. It uses the already-computed overalls for the first alarm check.
-    In this overlap case, it also avoids sending duplicate packets—only the overall packet is transmitted, with the alarm-source byte set appropriately.`,
+**When an alarm check overlaps with an overall measurement cycle:**
+The sensor avoids double computation. It uses the already-computed overalls for the first alarm check.
+In this overlap case, it also avoids sending duplicate packets—only the overall packet is transmitted, with the alarm-source byte set appropriately.`,
     mermaidDiagram: alarmLogic
   },
 
@@ -358,15 +358,15 @@ Configure alarm thresholds for temperature, acceleration, and velocity via downl
     title: 'Firmware Upgrade Over The Air',
     section: SectionType.FUOTA,
     content: `
-    1.  **Initialize Upgrade:** Gateway sends **Command Downlink 0x0500 (Port 22)** with image size in bytes (4 Bytes, LittleEndian) as the parameters.
-    2.  **Mode Switch:** AirVibe switches to LoRaWAN Class C (always listening) for fast acceptance of data blocks.
-    3.  **Acknowledge:** AirVibe sends **Initialize Upgrade Acknowledgement Uplink Type 16 (0x10)** (1 Byte, Error Code=0). The LoRa Network/Application Server updates its profile of the AirVibe to Class C Mode so the downlinks will be sent as quickly as the network allows.
-    4.  **Data:** Gateway streams the upgrade.bin image via **Upgrade Data Downlinks (Port 25)**. Each block contains a block number (2 Bytes, LittleEndian) followed by an upgrade.bin chunk (51 Bytes). If the image size divided by 51 has a remainder, the last block will be shorter.
-    5.  **Verify Command:** When all Upgrade Data Downlinks have been sent from the Gateway, the Gateway should send **Command Downlink 0x0600 (Port 22)** to the AirVibe.
-    6.  **Verification Status:** The AirVibe will respond with **Upgrade Verification Status Uplink Type 17 (0x11)**.
-    7.  If any blocks are flagged, they should be resent via **Upgrade Data Downlinks (Port 25)**, followed by another **Command Downlink 0x0600 (Port 22)**. This verify-and-resend cycle repeats until no missing blocks remain.
-    8.  Once **Upgrade Verification Status Uplink Type 17 (0x11)** returns from the AirVibe with flag=0 and count=0, the AirVibe runs a CRC16 check on the image to verify that it was all successfully received, then the AirVibe applies the firmware update (to the TPM or VSM as defined by the upgrade.bin binary file), reverts back to Class A Mode, and reboots. The LoRa Network/Application Server updates its profile of the AirVibe back to Class A Mode.
-    `,
+1.  **Initialize Upgrade:** Gateway sends **Command Downlink 0x0500 (Port 22)** with image size in bytes (4 Bytes, LittleEndian) as the parameters.
+2.  **Mode Switch:** AirVibe switches to LoRaWAN Class C (always listening) for fast acceptance of data blocks.
+3.  **Acknowledge:** AirVibe sends **Initialize Upgrade Acknowledgement Uplink Type 16 (0x10)** (1 Byte, Error Code=0). The LoRa Network/Application Server updates its profile of the AirVibe to Class C Mode so the downlinks will be sent as quickly as the network allows.
+4.  **Data:** Gateway streams the upgrade.bin image via **Upgrade Data Downlinks (Port 25)**. Each block contains a block number (2 Bytes, LittleEndian) followed by an upgrade.bin chunk (51 Bytes). If the image size divided by 51 has a remainder, the last block will be shorter.
+5.  **Verify Command:** When all Upgrade Data Downlinks have been sent from the Gateway, the Gateway should send **Command Downlink 0x0600 (Port 22)** to the AirVibe.
+6.  **Verification Status:** The AirVibe will respond with **Upgrade Verification Status Uplink Type 17 (0x11)**.
+7.  If any blocks are flagged, they should be resent via **Upgrade Data Downlinks (Port 25)**, followed by another **Command Downlink 0x0600 (Port 22)**. This verify-and-resend cycle repeats until no missing blocks remain.
+8.  Once **Upgrade Verification Status Uplink Type 17 (0x11)** returns from the AirVibe with flag=0 and count=0, the AirVibe runs a CRC16 check on the image to verify that it was all successfully received, then the AirVibe applies the firmware update (to the TPM or VSM as defined by the upgrade.bin binary file), reverts back to Class A Mode, and reboots. The LoRa Network/Application Server updates its profile of the AirVibe back to Class A Mode.
+`,
     mermaidDiagram: firmwareUpgradeOta
   }
 ];

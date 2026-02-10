@@ -6,7 +6,7 @@ function hexToBytes(hex: string): number[] {
   if (clean.length % 2 !== 0) throw new Error('Invalid hex string');
   const out: number[] = [];
   for (let i = 0; i < clean.length; i += 2) {
-    out.push(parseInt(clean.substr(i, 2), 16));
+    out.push(parseInt(clean.slice(i, i + 2), 16));
   }
   return out;
 }
