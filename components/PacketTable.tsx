@@ -42,7 +42,13 @@ const PacketTable: React.FC<PacketTableProps> = ({ title, packetType, port, fiel
               <td className="px-6 py-3 text-sm font-medium text-slate-900">{field.name}</td>
               <td className="px-6 py-3 text-sm text-slate-600">{field.description}</td>
               {hasValues && (
-                <td className="px-6 py-3 text-sm text-slate-600 font-mono">{field.values || '-'}</td>
+                <td className="px-6 py-3 text-sm text-slate-600 font-mono">
+                  {field.values
+                    ? field.values.split(' | ').map((v, i) => (
+                        <div key={i} className="py-0.5">{v.trim()}</div>
+                      ))
+                    : '-'}
+                </td>
               )}
               {hasDefault && (
                 <td className="px-6 py-3 text-sm text-slate-500 font-mono">{field.default || '-'}</td>
