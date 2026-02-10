@@ -5,6 +5,7 @@ import { decoderExamples, DecoderExample } from '../data/decoderExamples';
 import { encoderExamples, EncoderExample } from '../data/encoderExamples';
 import { decodeUplink } from '../utils/airvibeDecoder';
 import DownlinkEncoder from './DownlinkEncoder';
+import { COPY_FEEDBACK_MS } from '../constants';
 
 
 const UplinkDecoder: React.FC = () => {
@@ -52,7 +53,7 @@ const UplinkDecoder: React.FC = () => {
   const handleDecCopy = () => {
     navigator.clipboard.writeText(decoded);
     setDecCopied(true);
-    setTimeout(() => setDecCopied(false), 2000);
+    setTimeout(() => setDecCopied(false), COPY_FEEDBACK_MS);
   };
 
   const handleRemoveDecExample = (e: React.MouseEvent, id: string) => {

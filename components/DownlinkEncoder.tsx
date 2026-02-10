@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Copy, Check } from 'lucide-react';
 import { EncoderExample } from '../data/encoderExamples';
 import { encodeDownlink } from '../utils/airvibeEncoder';
+import { COPY_FEEDBACK_MS } from '../constants';
 
 interface DownlinkEncoderProps {
   initialExample: EncoderExample;
@@ -56,7 +57,7 @@ const DownlinkEncoder: React.FC<DownlinkEncoderProps> = ({ initialExample, onUpd
   const handleCopy = () => {
     navigator.clipboard.writeText(encodedHex);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setTimeout(() => setCopied(false), COPY_FEEDBACK_MS);
   };
 
   return (

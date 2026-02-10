@@ -1,5 +1,6 @@
 
 import React, { useMemo, useRef, useState } from 'react';
+import { COPY_FEEDBACK_MS } from '../constants';
 
 // --- Utility functions -----------------------------------------------------
 function bytesToHex(bytes: Uint8Array): string {
@@ -172,7 +173,7 @@ export default function FuotaHelper() {
 
   function showToast(msg: string) {
     setToast(msg);
-    setTimeout(() => setToast(''), 2200);
+    setTimeout(() => setToast(''), COPY_FEEDBACK_MS);
   }
 
   return (
@@ -384,7 +385,8 @@ export default function FuotaHelper() {
         <div className="px-4 py-5 border-t border-slate-200 bg-slate-50">
           <h5 className="text-sm font-semibold text-slate-700 mb-2">How does this work?</h5>
           <p className="text-sm text-slate-600 leading-relaxed mb-2">
-            The FUOTA (Firmware Upgrade Over-The-Air) process splits a firmware binary into 51-byte blocks for transmission over LoRaWAN.
+            The FUOTA (Firmware Upgrade Over-The-Air) process splits a firmware binary into blocks for transmission over LoRaWAN.
+            Each Upgrade Data Downlink (Port 25) carries a 2-byte block number followed by up to 51 bytes of firmware data — the 51-byte chunk size comes from the Data field defined in the Upgrade Data Downlink packet structure.
             The gateway initializes the session, streams data blocks, then verifies receipt. Missing blocks are retransmitted until the sensor confirms a complete image.
           </p>
           <ul className="text-sm text-slate-600 list-disc pl-5 space-y-1">
