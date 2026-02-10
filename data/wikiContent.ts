@@ -63,7 +63,7 @@ Configure alarm thresholds for temperature, acceleration, and velocity via downl
       fields: [
         { byte: '0', name: 'Packet Type', description: 'Identifies packet as Current Configuration', values: '4 (0x04)' },
         { byte: '1', name: 'Version', description: 'Protocol Version' },
-        { byte: '2', name: 'Push Mode', description: 'Data transmission mode', values: 'overall 1 (0x01) | time_waveform 2 (0x02) | dual_mode 3 (0x03)' },
+        { byte: '2', name: 'Push Mode', description: 'Data transmission mode', values: 'overall_only 1 (0x01) | waveform_only 2 (0x02) | overall_and_waveform 3 (0x03)' },
         { byte: '3', name: 'Time Waveform Axis', description: 'Bitmask of active axes', values: 'axis_1_only 1 (0x01) | axis_2_only 2 (0x02) | axis_3_only 4 (0x04) | all_axes 7 (0x07)' },
         { byte: '4', name: 'Acceleration Range', description: 'Accelerometer full-scale range', values: '2 (0x02) | 4 (0x04) | 8 (0x08) | 16 (0x10) | 32 (0x20) | 64 (0x40)' },
         { byte: '5', name: 'Hardware Filter', description: 'Analog hardware filter setting', values: 'no_filter 0 (0x00) | hp_33Hz 23 (0x17) | hp_67Hz 22 (0x16) | hp_134Hz 21 (0x15) | hp_267Hz 20 (0x14) | hp_593Hz 19 (0x13) | hp_1335Hz 18 (0x12) | hp_2670Hz 17 (0x11) | lp_33Hz 135 (0x87) | lp_67Hz 134 (0x86) | lp_134Hz 133 (0x85) | lp_267Hz 132 (0x84) | lp_593Hz 131 (0x83) | lp_1335Hz 130 (0x82) | lp_2670Hz 129 (0x81) | lp_6675Hz 128 (0x80)' },
@@ -174,7 +174,7 @@ Configure alarm thresholds for temperature, acceleration, and velocity via downl
       port: 30,
       fields: [
         { byte: '0', name: 'Version', description: 'Protocol Version', values: '2 (0x02)', default: '2' },
-        { byte: '1', name: 'Push Mode', description: 'Data transmission mode', values: 'overall 1 (0x01) | time_waveform 2 (0x02) | dual_mode 3 (0x03)', default: '0x01' },
+        { byte: '1', name: 'Push Mode', description: 'Data transmission mode', values: 'overall_only 1 (0x01) | waveform_only 2 (0x02) | overall_and_waveform 3 (0x03)', default: '0x01' },
         { byte: '2', name: 'Axis', description: 'Bitmask of active axes', values: 'axis_1_only 1 (0x01) | axis_2_only 2 (0x02) | axis_3_only 4 (0x04) | all_axes 7 (0x07)', default: '0x07' },
         { byte: '3', name: 'Accel Range', description: 'Accelerometer full-scale range in g', values: '2 (0x02) | 4 (0x04) | 8 (0x08) | 16 (0x10) | 32 (0x20) | 64 (0x40)', default: '8' },
         { byte: '4', name: 'Hardware Filter', description: 'Analog hardware filter setting', values: 'no_filter 0 (0x00) | hp_33Hz 23 (0x17) | hp_67Hz 22 (0x16) | hp_134Hz 21 (0x15) | hp_267Hz 20 (0x14) | hp_593Hz 19 (0x13) | hp_1335Hz 18 (0x12) | hp_2670Hz 17 (0x11) | lp_33Hz 135 (0x87) | lp_67Hz 134 (0x86) | lp_134Hz 133 (0x85) | lp_267Hz 132 (0x84) | lp_593Hz 131 (0x83) | lp_1335Hz 130 (0x82) | lp_2670Hz 129 (0x81) | lp_6675Hz 128 (0x80)', default: '129' },
@@ -270,16 +270,18 @@ Configure alarm thresholds for temperature, acceleration, and velocity via downl
     content: `The AirVibe sensor operates based on a flexible configuration schedule.
 
     **Push Modes**
-    *   **Overall (0x01):** Sends summary RMS data only. Efficient for battery.
-    *   **Time Waveform (0x02):** Sends full high-frequency raw data. High bandwidth usage.
-    *   **Both (0x03):** Alternates or sends both based on their respective periods.
+    *   **overall_only (0x01):** Sends summary RMS data only. Efficient for battery.
+    *   **waveform_only (0x02):** Sends full high-frequency raw data. High bandwidth usage.
+    *   **overall_and_waveform (0x03):** Alternates or sends both based on their respective periods.
 
     **Machine Off Function**
-    To save power and avoid logging "noise" when a machine is not running, the sensor features a **Machine Off Threshold**.
+    To conserve battery and avoid recording meaningless vibration data while the monitored equipment is idle, the sensor includes a configurable **Machine Off Threshold**.
 
-    *   Configured in **Byte 18-19** of Configuration Downlink (Port 30).
+    *   Configured in **Byte 18-19** of Configuration Downlink (Port 30). Default: **30 mg**.
     *   Unit: **mg (milli-g)**.
-    *   Logic: If the measured acceleration is below this threshold, the system decides the machine is off. The sensor may skip data transmission or flag the data accordingly.`
+    *   **Detection:** Before any vibration processing or alarm evaluation, the sensor compares the measured acceleration against this threshold. If the reading falls below it, the machine is considered off.
+    *   **Behavior when off:** The sensor skips all vibration processing and alarm checks, sets the uplink status to \`machine_off\` (status code 16), and returns \`null\` for all vibration and temperature fields. Battery voltage and percentage are still reported.
+    *   **Alarm interaction:** Because the machine-off check runs first in every wake cycle, no alarms can fire while the machine is off — the sensor goes back to sleep immediately.`
   },
 
   // --- ALARMS ---
