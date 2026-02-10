@@ -52,7 +52,7 @@ export const downlinkPages: WikiPage[] = [
     packetTable: {
       port: 22,
       fields: [
-        { byte: '0-1', name: 'Command ID', description: 'Command identifier (u16 LE)', values: 'request_current_twf 1 (0x0100) | request_config 2 (0x0200) | request_new_twf 3 (0x0300) | init_upgrade 5 (0x0500) | verify_upgrade 6 (0x0600)' },
+        { byte: '0-1', name: 'Command ID', description: 'Command identifier (u16 LE)', values: 'request_current_twf_information 1 (0x0100) | request_config 2 (0x0200) | request_new_twf 3 (0x0300) | init_upgrade 5 (0x0500) | verify_upgrade 6 (0x0600)' },
         { byte: '2..', name: 'Parameters', description: 'Optional parameters (e.g. 4-byte file size for Command 5)' },
       ]
     }

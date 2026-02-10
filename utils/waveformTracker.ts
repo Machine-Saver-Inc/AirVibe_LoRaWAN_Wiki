@@ -19,12 +19,19 @@ export function hexToBytes(hex: string): Uint8Array {
   return out;
 }
 
+function u16le(b: Uint8Array, i: number): number {
+  return ((b[i + 1] << 8) | b[i]) & 0xFFFF;
+}
+
+function i16le(b: Uint8Array, i: number): number {
+  const v = u16le(b, i);
+  return v & 0x8000 ? v - 0x10000 : v;
+}
+
 function i16From(bytes: Uint8Array, start: number, count: number): number[] {
   const arr: number[] = [];
   for (let i = 0; i < count; i++) {
-    const off = start + i * 2;
-    const v = (bytes[off] << 8) | bytes[off + 1];
-    arr.push(v & 0x8000 ? v - 0x10000 : v);
+    arr.push(i16le(bytes, start + i * 2));
   }
   return arr;
 }
@@ -75,27 +82,27 @@ export function decodePacket(hex: string): Packet {
   const b = hexToBytes(hex);
   const type = b[0];
   const txId = b[1];
-  const seg = (b[2] << 8) | b[3];
 
   if (type === 0x03) {
     return {
       PacketType: 3,
       TransactionID: txId,
-      SegmentNumber: seg,
-      ErrorCode: b[5],
+      SegmentNumber: b[2],
+      ErrorCode: b[3],
       AxisSelection: b[4],
       AxisSelectionText: axisMaskToText(b[4]),
-      NumberOfSegments: b[6],
+      NumberOfSegments: u16le(b, 5),
       HardwareFilterCode: b[7],
       HardwareFilterText: filterCodeToText(b[7]),
-      SamplingRate_Hz: (b[8] << 8) | b[9],
-      NumberOfSamplesEachAxis: (b[10] << 8) | b[11],
+      SamplingRate_Hz: u16le(b, 8),
+      NumberOfSamplesEachAxis: u16le(b, 10),
       LastSegment: false,
       _raw: b,
     };
   }
 
   if (type === 0x01 || type === 0x05) {
+    const seg = u16le(b, 2);
     const sampleBytes = b.slice(4);
     if (sampleBytes.length % 2 !== 0) throw new Error('Sample payload length must be even');
     const n = sampleBytes.length / 2;
@@ -182,8 +189,10 @@ function initSegSizes(tx: Transaction): void {
 }
 
 function buildMissingHex(idxs: number[]): string {
-  const s = idxs.map(x => x.toString(16).padStart(2, '0')).join('');
-  return `02${s}`;
+  const mode = '00';
+  const count = idxs.length.toString(16).padStart(2, '0');
+  const segs = idxs.map(x => x.toString(16).padStart(2, '0')).join('');
+  return `${mode}${count}${segs}`;
 }
 
 export function assemble(prev: WaveState, pkt: Packet): WaveState {
@@ -214,13 +223,13 @@ export function assemble(prev: WaveState, pkt: Packet): WaveState {
     tx.samplesPerAxis = (pkt as ParamsPacket).NumberOfSamplesEachAxis;
     if ([0x07, 0x01, 0x02, 0x04].includes(tx.axisMask)) initSegSizes(tx);
     tx.downlinks = [
-      { label: 'ACK Time Waveform Information Uplink', port: 20, hex: `03${pkt.TransactionID.toString(16).padStart(2, '0')}` },
+      { label: 'Send Waveform Acknowledgement Downlink - Information Acknowledgement', port: 20, hex: `03${pkt.TransactionID.toString(16).padStart(2, '0')}` },
     ];
   } else {
     const dataPkt = pkt as DataPacket;
     if (!tx.params) {
       tx.sawDataBeforeParams = true;
-      tx.downlinks = [{ label: 'REQ Time Waveform Information Uplink', port: 22, hex: '0001' }];
+      tx.downlinks = [{ label: 'Send Command Downlink · request_current_twf_information 1 (0x0100)', port: 22, hex: '0100' }];
     }
 
     if (![0x07, 0x01, 0x02, 0x04].includes(tx.axisMask)) {
@@ -247,20 +256,19 @@ export function assemble(prev: WaveState, pkt: Packet): WaveState {
   }
   const complete = tx.expected != null && missing.length === 0 && tx.segments.size === tx.expected;
 
-  if (pkt.PacketType === 0x05) {
-    if (missing.length > 0) {
-      tx.requestedMissing = true;
-      tx.downlinks = [
-        ...tx.downlinks,
-        { label: `Request Missing Segments [${missing.join(', ')}]`, port: 22, hex: buildMissingHex(missing) },
-      ];
-    } else {
-      tx.downlinks = [
-        ...tx.downlinks,
-        { label: 'Download assembled CSV', port: 0, hex: `export:${tx.txId}` },
-        { label: 'ACK ALL', port: 20, hex: `01${tx.txId.toString(16).padStart(2, '0')}` },
-      ];
-    }
+  if (pkt.PacketType === 0x05 && missing.length > 0) {
+    tx.requestedMissing = true;
+    tx.downlinks = [
+      ...tx.downlinks,
+      { label: `Request Missing Segments [${missing.join(', ')}]`, port: 21, hex: buildMissingHex(missing) },
+    ];
+  }
+
+  if (complete) {
+    tx.downlinks = [
+      ...tx.downlinks,
+      { label: 'Send Waveform Acknowledgement Downlink - Data Acknowledgement', port: 20, hex: `01${tx.txId.toString(16).padStart(2, '0')}` },
+    ];
   }
 
   return { ...prev, [tx.txId]: { ...tx, missing, maxSeen, complete } };
@@ -364,8 +372,8 @@ export function downloadText(filename: string, text: string): void {
 }
 
 export const EXAMPLE_PACKETS = [
-  '03210000070003814e200015',
-  '01210000ffff000000020000fffc00020000fffd0003fffffffc0001fffdfffefffeffff0002ffff00000005fffb',
-  '01210001fffd0005fff8fffc0003fffa00000004fffc0000000500000003000200020006ffff00030005ffff0000',
-  '052100020002fffe00000003fffffffd0003fffdfffcfffffffc0003ffff00000005000000020004000200000007',
+  '0321000007030081204e1500',
+  '01210000ffff000002000000fcff02000000fdff0300fffffcff0100fdfffefffeffffff0200ffff00000500fbff',
+  '01210100fdff0500f8fffcff0300faff00000400fcff0000050000000300020002000600ffff03000500ffff0000',
+  '052102000200feff00000300fffffdff0300fdfffcfffffffcff0300ffff00000500000002000400020000000700',
 ].join('\n');
