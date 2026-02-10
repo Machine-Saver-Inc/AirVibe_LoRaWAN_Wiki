@@ -513,8 +513,8 @@ export default function WaveformTracker() {
       for (const p of newPkts) state = assemble(state, p);
       setLog(newLog);
       setWaves(state);
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : String(e));
     }
   };
 
@@ -534,8 +534,8 @@ export default function WaveformTracker() {
     try {
       const csv = buildCsvForTx(tx);
       downloadText(`airvibe_tx_${tx.txId}_${Date.now()}.csv`, csv);
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : String(e));
     }
   };
 

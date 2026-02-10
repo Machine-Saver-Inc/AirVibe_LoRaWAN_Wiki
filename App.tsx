@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Menu, X, Book, Database, Activity, Settings, Cpu, Radio, Code, MessageSquare, Rocket } from 'lucide-react';
-import { wikiData } from './data/wikiContent';
+import { wikiData } from './data/sections';
 import PacketTable from './components/PacketTable';
 import MermaidDiagram from './components/MermaidDiagram';
 import AISearch from './components/AISearch';
@@ -10,6 +10,7 @@ import UplinkDecoder from './components/UplinkDecoder';
 import AlarmBitmaskCalculator from './components/AlarmBitmaskCalculator';
 import WaveformTracker from './components/WaveformTracker';
 import FuotaHelper from './components/FuotaHelper';
+import ErrorBoundary from './components/ErrorBoundary';
 import { SectionType, WikiPage } from './types';
 
 function App() {
@@ -156,10 +157,11 @@ function App() {
 
         {/* Scrollable Content Area */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-8 lg:p-12 scroll-smooth">
-          
+          <ErrorBoundary>
+
           {activeSection !== SectionType.DECODER && (
-            <AISearch 
-              activeData={activeData} 
+            <AISearch
+              activeData={activeData}
               onNavigate={handleNavigate}
             />
           )}
@@ -196,8 +198,8 @@ function App() {
                   )}
 
                   {page.packetTable && (
-                    <PacketTable 
-                      packetType={page.packetTable.packetType} 
+                    <PacketTable
+                      packetType={page.packetTable.packetType}
                       port={page.packetTable.port}
                       fields={page.packetTable.fields}
                     />
@@ -242,6 +244,8 @@ function App() {
               )}
             </div>
           )}
+
+          </ErrorBoundary>
         </div>
       </main>
     </div>

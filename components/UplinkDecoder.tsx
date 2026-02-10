@@ -41,8 +41,8 @@ const UplinkDecoder: React.FC = () => {
     try {
       const result = decodeUplink(hex, port);
       setDecoded(JSON.stringify(result, null, 4));
-    } catch (e: any) {
-      setDecoded(`Error decoding: ${e.message}`);
+    } catch (e: unknown) {
+      setDecoded(`Error decoding: ${e instanceof Error ? e.message : String(e)}`);
     }
   };
 
@@ -270,7 +270,7 @@ const UplinkDecoder: React.FC = () => {
           </button>
         </div>
         <div className={`flex-1 overflow-y-auto p-2 space-y-2 ${showExamples ? '' : 'hidden lg:block'}`}>
-          {activeExamples.map((ex: any) => (
+          {activeExamples.map((ex: DecoderExample | EncoderExample) => (
             <div 
               key={ex.id}
               onClick={() => handleSelectId(ex.id)}

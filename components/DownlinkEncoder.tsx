@@ -43,7 +43,7 @@ const DownlinkEncoder: React.FC<DownlinkEncoderProps> = ({ initialExample, onUpd
         // Only trigger update callback if valid
         onUpdateJson(initialExample.id, parsed);
       }
-    } catch (e: any) {
+    } catch {
       setError("Invalid JSON format");
       setEncodedHex('');
     }
