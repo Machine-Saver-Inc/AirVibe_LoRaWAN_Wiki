@@ -206,7 +206,7 @@ function App() {
                   )}
 
                   {page.extraTable && (
-                    <div className="overflow-hidden rounded-lg border border-slate-200 shadow-sm mt-4">
+                    <div className="rounded-lg border border-slate-200 shadow-sm mt-4">
                       <div className="bg-slate-100 px-4 py-3 border-b border-slate-200">
                           <h4 className="font-semibold text-slate-700">{page.extraTable.title}</h4>
                       </div>

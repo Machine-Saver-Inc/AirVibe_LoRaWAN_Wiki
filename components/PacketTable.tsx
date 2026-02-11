@@ -13,7 +13,7 @@ const PacketTable: React.FC<PacketTableProps> = ({ title, packetType, port, fiel
   const hasDefault = fields.some(f => f.default);
 
   return (
-    <div className="overflow-hidden rounded-lg border border-slate-200 shadow-sm mt-4 mb-8">
+    <div className="rounded-lg border border-slate-200 shadow-sm mt-4 mb-8">
       <div className="bg-slate-100 px-4 py-3 border-b border-slate-200 flex justify-between items-center">
         <h4 className="font-semibold text-slate-700">{title || 'Packet Structure'}</h4>
         <div className="text-sm font-mono bg-white px-2 py-1 rounded border border-slate-300">
@@ -21,6 +21,7 @@ const PacketTable: React.FC<PacketTableProps> = ({ title, packetType, port, fiel
           {port !== undefined && <span>Port: <span className="text-purple-600 font-bold">{port}</span></span>}
         </div>
       </div>
+      <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-slate-200">
         <thead className="bg-slate-50">
           <tr>
@@ -57,6 +58,7 @@ const PacketTable: React.FC<PacketTableProps> = ({ title, packetType, port, fiel
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 };
