@@ -149,6 +149,7 @@ export interface Transaction {
   missing: number[];
   maxSeen: number;
   complete: boolean;
+  startTime: Date | null;
 }
 
 export type WaveState = Record<number, Transaction>;
@@ -213,6 +214,7 @@ export function assemble(prev: WaveState, pkt: Packet): WaveState {
     missing: [],
     maxSeen: -1,
     complete: false,
+    startTime: new Date(),
   };
 
   if (pkt.PacketType === 3) {
@@ -339,22 +341,47 @@ export function buildWaveformForPlot(tx: Transaction): WaveformData | null {
 }
 
 // --- CSV export -----------------------------------------------------------
+function formatDateForFilename(d: Date): string {
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}_${pad(d.getMinutes())}_${pad(d.getSeconds())}`;
+}
+
+function formatDateForCsv(d: Date): string {
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
+export function csvFilenameForTx(tx: Transaction): string {
+  const hexId = `0x${tx.txId.toString(16).padStart(2, '0').toUpperCase()}`;
+  const timeStr = tx.startTime ? formatDateForFilename(tx.startTime) : 'unknown';
+  return `AirVibe_Waveform_TXid_${hexId}_${timeStr}.csv`;
+}
+
 export function buildCsvForTx(tx: Transaction): string {
   const wf = buildWaveformForPlot(tx);
   if (!wf) throw new Error('Waveform not ready to export');
+  const isTri = tx.axisMask === 0x07;
+  const numAxes = isTri ? 3 : 1;
+  const totalSamples = (tx.samplesPerAxis ?? wf.totalSamples) * numAxes;
+  const txHex = `0x${tx.txId.toString(16).padStart(2, '0').toUpperCase()}`;
+  const startTimeStr = tx.startTime ? formatDateForCsv(tx.startTime) : '';
+  const samplePeriod = tx.sr ? 1 / tx.sr : 0;
   const meta = [
-    `# tx_id=${tx.txId}`,
+    `# tx_id_decimal: ${tx.txId}`,
+    `tx_id_hex: ${txHex}`,
+    `waveform_start_time: ${startTimeStr}`,
     `axis_selection=${tx.params ? tx.params.AxisSelectionText : axisMaskToText(tx.axisMask)}`,
     `sampling_rate_hz=${tx.sr}`,
     `filter=${tx.params ? tx.params.HardwareFilterText : ''}`,
     `segments=${tx.expected}`,
     `samples_per_axis=${tx.samplesPerAxis}`,
-    `total_samples=${wf.totalSamples}`,
+    `total_samples=${totalSamples}`,
   ].join(', ');
-  const header = 'sample_index,axis1,axis2,axis3';
+  const header = 'sample_index,time_seconds,axis_1_acceleration_milligs,axis_2_acceleration_milligs,axis_3_acceleration_milligs';
   const rows: string[] = [];
   for (let i = 0; i < wf.totalSamples; i++) {
-    rows.push(`${i},${wf.axis[0][i] ?? 0},${wf.axis[1][i] ?? 0},${wf.axis[2][i] ?? 0}`);
+    const time = (i * samplePeriod).toFixed(6);
+    rows.push(`${i},${time},${wf.axis[0][i] ?? 0},${wf.axis[1][i] ?? 0},${wf.axis[2][i] ?? 0}`);
   }
   return `${meta}\n${header}\n${rows.join('\n')}`;
 }
@@ -372,8 +399,15 @@ export function downloadText(filename: string, text: string): void {
 }
 
 export const EXAMPLE_PACKETS = [
-  '0321000007030081204e1500',
-  '01210000ffff000002000000fcff02000000fdff0300fffffcff0100fdfffefffeffffff0200ffff00000500fbff',
-  '01210100fdff0500f8fffcff0300faff00000400fcff0000050000000300020002000600ffff03000500ffff0000',
-  '052102000200feff00000300fffffdff0300fdfffcfffffffcff0300ffff00000500000002000400020000000700',
+  '03190000070a0081204e420008',
+  '011900000600a60209000900440207000700ca0103000600350101000700930005000500f1ffffff050050fff9ff',
+  '011901000100b8fef7ff0000dbfdf6fffdff94fdf7ff02007afdfbff050089fdfaff0300b9fdf6fffeff11fef8ff',
+  '01190200f9ff8afef9fff9ff19fffcfff4ffafff0100f3ff53000500fafff8001200ffff90010f00fcff8b020d00',
+  '01190300fbffd3020c00fffff5020d00fcffed020d000000c502080005001202070008008d0100000d00eb000000',
+  '0119040008004000030005009fff0000040002fffdff030076fef4ff010003fef2ff0500b1fdfaff090081fdfdff',
+  '0119050008009afdf5ff0400e0fdf4ff000045fefafffaffc6fefefffbff5efffdfff8fffffffefff9ffa700fdff',
+  '01190600ffff490101000000db010300ffffb6020100fefff10205000200040305000500e6020200ffffab020300',
+  '011907000000cf0107000400cf01090007003f0105000300faffffff030057ff00000800c1fe000003003cfefdff',
+  '011908000000d8fdf6ffffff98fdf7fffcff78fdfffffdff87fdf7fff9ff0ffefefff8ff85fefdfff4ff0eff0000',
+  '05190900f4ffacff0300f9ff4e000200fcffee000800',
 ].join('\n');

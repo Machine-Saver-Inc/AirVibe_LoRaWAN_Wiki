@@ -11,6 +11,7 @@ import {
   segmentStates,
   buildWaveformForPlot,
   buildCsvForTx,
+  csvFilenameForTx,
   downloadText,
   EXAMPLE_PACKETS,
 } from '../utils/waveformTracker';
@@ -175,7 +176,7 @@ export default function WaveformTracker() {
   const handleDownload = (tx: Transaction) => {
     try {
       const csv = buildCsvForTx(tx);
-      downloadText(`airvibe_tx_${tx.txId}_${Date.now()}.csv`, csv);
+      downloadText(csvFilenameForTx(tx), csv);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : String(e));
     }
@@ -286,7 +287,7 @@ export default function WaveformTracker() {
                       className="px-3 py-1.5 rounded-md text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors"
                       onClick={() => handleDownload(tx)}
                     >
-                      Download assembled CSV
+                      Download Waveform CSV
                     </button>
                   )}
 
@@ -324,7 +325,7 @@ export default function WaveformTracker() {
                   <div key={idx} className="text-xs text-slate-600">
                     Type {p.PacketType.toString(16).padStart(2, '0').toUpperCase()} &middot; TxID {p.TransactionID} &middot; Seg {p.SegmentNumber}
                     {p.LastSegment ? ' (last)' : ''}
-                    {p.PacketType === 3 && ` &middot; ${(p as ParamsPacket).AxisSelectionText}, ${(p as ParamsPacket).NumberOfSegments} segs, ${(p as ParamsPacket).SamplingRate_Hz} Hz`}
+                    {p.PacketType === 3 && ` · ${(p as ParamsPacket).AxisSelectionText}, ${(p as ParamsPacket).NumberOfSegments} segs, ${(p as ParamsPacket).SamplingRate_Hz} Hz`}
                   </div>
                 ))}
               </div>
