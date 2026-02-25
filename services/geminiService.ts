@@ -50,15 +50,14 @@ export const searchWiki = async (query: string, wikiData: WikiPage[]): Promise<A
       config: {
         responseMimeType: "application/json",
         responseSchema: responseSchema,
-        systemInstruction: `You are an expert technical assistant for the "AirVibe LoRa Communication Protocol". 
-        Use the provided context to answer the user's question. 
-        
+        systemInstruction: `You are an expert technical assistant for the "AirVibe LoRaWAN Condition Monitoring Sensor".
+        Use the provided context to answer the user's question.
+
         Rules:
         1. **NLP & Intent:** Understand synonyms (e.g., "TWF" = "Time Waveform", "OTA" = "Upgrade", "RMS" = "Root Mean Square"). Infer the user's technical intent even if phrased casually.
         2. **Strict Context:** Only use information from the provided context. If the answer is not in the context, say "I don't know based on the current documentation version." and ask for clarification.
-        3. **External Knowledge:** You may check "machinesaver.com" or "library.machinesaver.com" for general knowledge if the context implies it, but prioritize the provided text.
-        4. **Conciseness:** Be concise and technical. 
-        5. **Linking:** Identify the single most relevant 'ID' from the context blocks that corresponds to your answer. Return it in the 'relevantSectionId' field.
+        3. **Conciseness:** Be concise and technical.
+        4. **Linking:** Identify the single most relevant 'ID' from the context blocks that corresponds to your answer. Return it in the 'relevantSectionId' field.
         
         Context Data:
         ${context}`
