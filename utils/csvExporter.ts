@@ -10,11 +10,12 @@ const escapeCsv = (value: string | number | undefined): string => {
   return stringValue;
 };
 
-export const exportTablesToCSV = (wikiData: WikiPage[], version: string) => {
+export const exportTablesToCSV = (wikiData: WikiPage[]) => {
   const rows: string[] = [];
+  const date = new Date().toISOString().split('T')[0];
 
-  rows.push(`AirVibe Wiki Tables Export - Version ${version}`);
-  rows.push(`Export Date,${new Date().toISOString().split('T')[0]}`);
+  rows.push(`AirVibe Wiki Tables Export`);
+  rows.push(`Export Date,${date}`);
   rows.push(''); // Empty line
 
   wikiData.forEach((page) => {
@@ -66,7 +67,7 @@ export const exportTablesToCSV = (wikiData: WikiPage[], version: string) => {
   
   const link = document.createElement('a');
   link.setAttribute('href', url);
-  link.setAttribute('download', `AirVibe_Wiki_Tables_v${version}.csv`);
+  link.setAttribute('download', `AirVibe_Wiki_Tables_${date}.csv`);
   link.style.visibility = 'hidden';
   document.body.appendChild(link);
   link.click();

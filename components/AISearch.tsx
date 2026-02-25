@@ -24,7 +24,6 @@ const AISearch: React.FC<AISearchProps> = ({ activeData, onNavigate }) => {
     setAnswer(null);
     setLinkId(null);
     
-    // Pass the currently active data version to the search
     const result = await searchWiki(query, activeData);
     
     setAnswer(result.answer);
