@@ -25,17 +25,18 @@ Deployment is automated via GitHub Actions on push to `main`. Requires `GEMINI_A
 
 ### Key directories
 
-- `components/` — React functional components (AISearch, UplinkDecoder, DownlinkEncoder, PacketTable, MermaidDiagram, MarkdownRenderer)
-- `data/` — Wiki content definitions (`wikiContent.ts` exports `wikiData`), decoder/encoder example payloads
+- `components/` — React functional components: `AISearch`, `UplinkDecoder`, `DownlinkEncoder`, `ExamplesSidebar`, `PacketTable`, `MermaidDiagram`, `MarkdownRenderer`, `AlarmBitmaskCalculator`, `WaveformTracker`, `FuotaHelper`, `ErrorBoundary`. Note: `DownlinkEncoder` and `ExamplesSidebar` are sub-components rendered inside `UplinkDecoder`, not directly by `App.tsx`.
+- `data/` — Wiki content split across `data/sections/` (one file per section; `data/sections/index.ts` aggregates them into `wikiData`), plus `decoderExamples.ts` and `encoderExamples.ts`
 - `services/` — Gemini API integration (`geminiService.ts`)
-- `utils/` — LoRaWAN payload decoder/encoder logic, CSV export
-- `types.ts` — Core TypeScript interfaces (`WikiPage`, `PacketField`, `SectionType` enum)
+- `utils/` — LoRaWAN payload decoder/encoder logic (`airvibeDecoder.ts`, `airvibeEncoder.ts`), CSV export (`csvExporter.ts`), waveform processing (`waveformTracker.ts`), FUOTA payload helpers (`fuotaPayloads.ts`)
+- `constants.ts` — Shared constants (e.g. `COPY_FEEDBACK_MS`)
+- `types.ts` — Core TypeScript interfaces (`WikiPage`, `PacketField`, `TableData`, `SearchResult`, `SectionType` enum)
 
 ### AI search integration
 
 `AISearch.tsx` → `geminiService.searchWiki()` → Google Gemini (`gemini-2.5-flash`) with structured JSON output schema. The service constructs context from all current WikiPage content, sends it with the user query, and returns an answer plus a `relevantSectionId` for smooth-scroll navigation.
 
-The API key is injected at build time via Vite's `define` config from `VITE_GEMINI_API_KEY` env var.
+The API key is injected at build time via Vite's `define` config. `vite.config.ts` reads the `GEMINI_API_KEY` env var (set by CI from the `GEMINI_API_KEY` repository secret) and exposes it as `process.env.API_KEY`. `geminiService.ts` reads it via `process.env.API_KEY`.
 
 ### Decoder/Encoder utilities
 
