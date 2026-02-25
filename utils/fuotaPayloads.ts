@@ -20,14 +20,6 @@ export function u32ToBytesLE(n: number): Uint8Array {
   ]);
 }
 
-export function chunkBytes(arr: Uint8Array, chunkSize: number): Uint8Array[] {
-  const out: Uint8Array[] = [];
-  for (let i = 0; i < arr.length; i += chunkSize) {
-    out.push(arr.slice(i, Math.min(i + chunkSize, arr.length)));
-  }
-  return out;
-}
-
 export function formatBlockKeyLE(index: number): string {
   const v = index & 0xffff;
   const lo = v & 0xff;

@@ -40,7 +40,3 @@ export interface WikiPage {
   extraTable?: TableData;
 }
 
-export interface SearchResult {
-  answer: string;
-  relevantSectionId?: string;
-}
