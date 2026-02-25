@@ -4,7 +4,7 @@ import { WikiPage } from '../types';
 const apiKey = process.env.API_KEY || '';
 const ai = new GoogleGenAI({ apiKey });
 
-// Construct a context string from the provided wiki data version
+// Construct a context string from all wiki pages for the Gemini prompt
 const getContextString = (data: WikiPage[]): string => {
   return data.map(page => `
     ---
@@ -55,7 +55,7 @@ export const searchWiki = async (query: string, wikiData: WikiPage[]): Promise<A
 
         Rules:
         1. **NLP & Intent:** Understand synonyms (e.g., "TWF" = "Time Waveform", "OTA" = "Upgrade", "RMS" = "Root Mean Square"). Infer the user's technical intent even if phrased casually.
-        2. **Strict Context:** Only use information from the provided context. If the answer is not in the context, say "I don't know based on the current documentation version." and ask for clarification.
+        2. **Strict Context:** Only use information from the provided context. If the answer is not in the context, say "I don't know based on the current documentation." and ask for clarification.
         3. **Conciseness:** Be concise and technical.
         4. **Linking:** Identify the single most relevant 'ID' from the context blocks that corresponds to your answer. Return it in the 'relevantSectionId' field.
         
