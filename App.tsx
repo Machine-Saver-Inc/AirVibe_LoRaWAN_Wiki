@@ -1,11 +1,10 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Menu, X, Book, Database, Activity, Settings, Cpu, Radio, Code, MessageSquare, Rocket, Download } from 'lucide-react';
 import { exportTablesToCSV } from './utils/csvExporter';
 import { wikiData } from './data/sections';
 import PacketTable from './components/PacketTable';
 import MermaidDiagram from './components/MermaidDiagram';
-import AISearch from './components/AISearch';
 import MarkdownRenderer from './components/MarkdownRenderer';
 import UplinkDecoder from './components/UplinkDecoder';
 import AlarmBitmaskCalculator from './components/AlarmBitmaskCalculator';
@@ -17,30 +16,6 @@ import { SectionType, WikiPage } from './types';
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<SectionType>(SectionType.OVERVIEW);
-  const [pendingScrollId, setPendingScrollId] = useState<string | null>(null);
-
-  // Handle scrolling after section change
-  useEffect(() => {
-    if (pendingScrollId) {
-      // Small timeout to allow the DOM to update with the new section content
-      const timer = setTimeout(() => {
-        const element = document.getElementById(pendingScrollId);
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          // Add highlight effect
-          element.classList.add('bg-blue-50', 'transition-colors', 'duration-500');
-          setTimeout(() => element.classList.remove('bg-blue-50'), 2000);
-        }
-        setPendingScrollId(null);
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [activeSection, pendingScrollId]);
-
-  const handleNavigate = (section: SectionType, id: string) => {
-    setActiveSection(section);
-    setPendingScrollId(id);
-  };
 
   // Define strict section order
   const sections = [
@@ -163,13 +138,6 @@ function App() {
         {/* Scrollable Content Area */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-8 lg:p-12 scroll-smooth">
           <ErrorBoundary>
-
-          {activeSection !== SectionType.DECODER && (
-            <AISearch
-              activeData={wikiData}
-              onNavigate={handleNavigate}
-            />
-          )}
 
           {activeSection === SectionType.DECODER ? (
             <UplinkDecoder />
