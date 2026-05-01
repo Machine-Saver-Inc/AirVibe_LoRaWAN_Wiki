@@ -17,6 +17,7 @@ export const timeWaveformPages: WikiPage[] = [
         ['FFT Block', 'FFT Size', 'N', '4,096 points', '12,288 points'],
         ['FFT Block', 'Time-window max length', 'Tw = N/fs', '0.2048 s', '0.6144 s'],
         ['Spectrum', 'Bin Spacing (Resolution)', 'Δf = fs/N', '4.88 Hz/bin', '1.63 Hz/bin'],
+        ['Spectrum', 'Lines of Resolution', 'LOR = N/2', '2,048 lines', '6,144 lines'],
         ['Sensor', '3 dB Bandwidth', '—', '~6.5 kHz', '~6.5 kHz'],
         ['Sensor', 'Practical Freq Span', 'Fmax', '10 Hz – 6,500 Hz', '4 Hz – 6,500 Hz'],
       ]
